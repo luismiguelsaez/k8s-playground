@@ -3,13 +3,13 @@ This is a test to see how default k8s internal DNS works. We're creating a deplo
 
 ## Apply the manifests
 ```
-k apply -f deployment.yaml
-k apply -f service.yaml
+❯ k apply -f deployment.yaml
+❯ k apply -f service.yaml
 ```
 
 ## List the created resources
 ```
-kgp -n nginx
+❯ kgp -n nginx
 NAME                     READY   STATUS    RESTARTS   AGE
 nginx-7fb7fd49b4-2zwgs   1/1     Running   0          23m
 nginx-7fb7fd49b4-dcv2d   1/1     Running   0          23m
@@ -25,10 +25,13 @@ nginx-headless   ClusterIP   None            <none>        80/TCP    12m
 
 ## Check resolver configuration
 
+### Create testing pod
+```
+❯ k run test --rm=true -it --image=alpine:3.11 --restart=Never --command -- sh
+```
+
 ### Pod internal file
 ```
-k run test --rm=true -it --image=alpine:3.11 --restart=Never --command -- sh
-
 / # cat /etc/resolv.conf
 nameserver 10.96.0.10
 search default.svc.cluster.local svc.cluster.local cluster.local

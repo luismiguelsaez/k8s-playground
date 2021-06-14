@@ -3,6 +3,8 @@ apiVersion: v1
 kind: Pod
 metadata:
   name: app-initcontainer
+  labels:
+    app: app-initcontainer
 spec:
   initContainers:
   - name: setup

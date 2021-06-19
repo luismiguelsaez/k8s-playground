@@ -26,3 +26,24 @@ multinode-test-m03   Ready    <none>   13m   v1.20.2
 NAME                 STATUS   ROLES    AGE   VERSION
 multinode-test-m02   Ready    <none>   14m   v1.20.2
 ```
+
+## Deploy logging forwarder
+### Add helm repo
+```
+❯ helm repo add fluent https://fluent.github.io/helm-charts
+```
+### Install chart
+```
+❯ k create namespace logging
+❯ helm install fluentbit fluent/fluent-bit --version 0.15.14 -f values-fluentbit.yaml -n logging
+```
+
+## Deploy nginx
+### Apply manifest
+```
+❯ k apply -f deployment-nginx.yaml
+```
+### Test service
+```
+❯ k run test --rm=true -it --image=busybox --restart=Never --command -- wget nginx.nginx.svc.cluster.local -O- --quiet
+```

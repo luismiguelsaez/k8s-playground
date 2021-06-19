@@ -47,3 +47,10 @@ multinode-test-m02   Ready    <none>   14m   v1.20.2
 ```
 ❯ k run test --rm=true -it --image=busybox --restart=Never --command -- wget nginx.nginx.svc.cluster.local -O- --quiet
 ```
+### Check nodeAffinity
+```
+❯ k get pods -ogo-template='{{ range .items }}{{ printf "%s\n" .spec.nodeName }}{{ end }}' -n nginx
+multinode-test-m03
+multinode-test-m03
+multinode-test-m03
+```

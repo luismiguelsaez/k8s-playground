@@ -1,0 +1,30 @@
+---
+
+architecture: standalone
+
+auth:
+  enabled: false
+
+nodeAffinityPreset:
+  type: soft
+  key: app
+  values:
+    - db
+
+affinity:
+  nodeAffinity:
+    requiredDuringSchedulingIgnoredDuringExecution:
+      nodeSelectorTerms:
+      - matchExpressions:
+        - key: app
+          operator: In
+          values:
+          - db
+
+resources:
+  limits:
+    cpu: 150m
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi

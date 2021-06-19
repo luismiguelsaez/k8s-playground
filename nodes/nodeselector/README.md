@@ -54,3 +54,19 @@ multinode-test-m03
 multinode-test-m03
 multinode-test-m03
 ```
+
+## Deploy mongodb
+### Add helm repo
+```
+❯ helm repo add bitnami https://charts.bitnami.com/bitnami
+```
+### Install chart
+```
+k create namespace mongodb
+helm install mongodb bitnami/mongodb --version 10.19.0 -f values-mongodb.yaml -n mongodb
+```
+### Check nodeAffinity
+```
+❯ k get pods -ogo-template='{{ range .items }}{{ printf "%s\n" .spec.nodeName }}{{ end }}' -n mongodb
+multinode-test-m02
+```

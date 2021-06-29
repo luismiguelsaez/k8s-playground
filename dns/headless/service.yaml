@@ -35,7 +35,8 @@ metadata:
     nginx.ingress.kubernetes.io/rewrite-target: /
 spec:
   rules:
-  - http:
+  - host: test.example.com
+    http:
       paths:
       - path: /
         pathType: Prefix

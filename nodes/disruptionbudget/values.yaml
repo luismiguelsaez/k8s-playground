@@ -1,0 +1,22 @@
+maxUnavailable: 1
+
+nodeSelector: {}
+
+nodeAffinity: {}
+
+resources:
+  requests:
+    cpu: "500m"
+    memory: "1024Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1500Mi"
+
+esJavaOpts: "-Xmx512m -Xms512m"
+
+readinessProbe:
+  failureThreshold: 3
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  successThreshold: 3
+  timeoutSeconds: 5

@@ -1,0 +1,9 @@
+apt:
+  sources:
+    docker:
+      source: "deb https://download.docker.com/linux/ubuntu $RELEASE stable"
+
+packages:
+  - docker-ce
+  - docker-ce-cli
+  - containerd.io

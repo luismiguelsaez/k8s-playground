@@ -19,21 +19,21 @@ nodes:
 - role: worker
   kubeadmConfigPatches:
   - |
-      kind: InitConfiguration
+      kind: JoinConfiguration
       nodeRegistration:
         kubeletExtraArgs:
           node-labels: "type=web"
 - role: worker
   kubeadmConfigPatches:
   - |
-      kind: InitConfiguration
+      kind: JoinConfiguration
       nodeRegistration:
         kubeletExtraArgs:
           node-labels: "type=db"
 - role: worker
   kubeadmConfigPatches:
   - |
-      kind: InitConfiguration
+      kind: JoinConfiguration
       nodeRegistration:
         kubeletExtraArgs:
           node-labels: "type=db"

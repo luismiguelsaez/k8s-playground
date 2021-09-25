@@ -1,5 +1,10 @@
 
 # Server bootstrapping
+
+## Create cluster
+```
+kind create cluster --name argo-test --config kind-cluster-4no-ingress.yml
+```
 ## ArgoCD charts
 https://github.com/argoproj/argo-helm/tree/master/charts
 ## Add repository
@@ -10,6 +15,7 @@ helm repo add argo https://argoproj.github.io/argo-helm
 ```
 kubectl create ns argocd
 helm install argocd argo/argo-cd -n argocd
+k wait --for=condition=running pod -l app.kubernetes.io/component=server
 ```
 ## Connect ArgoCD
 ### Get admin user initial password

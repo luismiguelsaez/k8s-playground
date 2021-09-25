@@ -15,7 +15,7 @@ helm repo add argo https://argoproj.github.io/argo-helm
 ```
 kubectl create ns argocd
 helm install argocd argo/argo-cd -n argocd
-k wait --for=condition=running pod -l app.kubernetes.io/component=server
+k wait --for=condition=ready pod -l app.kubernetes.io/component=server --timeout=300s -n argocd
 ```
 ## Connect ArgoCD
 ### Get admin user initial password
@@ -37,9 +37,11 @@ argocd login 127.0.0.1:8080 --insecure --username admin --password $(kubectl get
 ```
 kubectl create namespace argo-rollouts
 kubectl apply -n argo-rollouts -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+k wait --for=condition=ready pod -l app.kubernetes.io/name=argo-rollouts --timeout=300s -n argo-rollouts
 ```
 ### Create application
 ```
 argocd app create --name blue-green --repo https://github.com/argoproj/argocd-example-apps --dest-server https://kubernetes.default.svc --dest-namespace default --path blue-green
+k wait --for=condition=ready pod -l app=helm-guestbook --timeout=300s -n default
 argocd app sync blue-green
 ```

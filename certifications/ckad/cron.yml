@@ -1,0 +1,19 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: date
+spec:
+  schedule: "*/1 * * * *"
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: printdate
+              image: alpine:3.11
+              args:
+                - /bin/sh
+                - -c
+                - echo the date is $(date)
+          restartPolicy: OnFailure
+

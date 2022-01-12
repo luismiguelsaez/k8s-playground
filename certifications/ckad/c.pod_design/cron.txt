@@ -1,0 +1,9 @@
+
+# Create cronjob
+kubectl create cronjob busybox --image=busybox --schedule='*/1 * * * *' -- /bin/sh -c 'date; echo Hello'
+
+# Get logs
+kubectl logs busybox-27366664--1-8l4p6
+
+# Create cronjob running every minute
+kubectl create cronjob busybox --image=busybox --schedule='*1 * * * *' --dry-run=client -o yaml -- /bin/sh -c 'date; echo Hello from the Kubernetes cluster' > cronjob-every-min.yaml

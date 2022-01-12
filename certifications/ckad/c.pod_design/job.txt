@@ -1,0 +1,22 @@
+
+# Create job
+kubectl create job pi --image=perl -- perl -Mbignum=bpi -wle 'print bpi(2000)'
+
+# Get job logs
+kubectl logs job/pi
+
+# Delete job
+kubectl delete job pi
+
+# Create echo job
+kubectl create job helloworld --image=busybox -- 'echo hello;sleep 30;echo world'
+
+# Follow logs until second message is printed
+kubectl logs -f job/helloworld
+
+# Create job to be terminated after 30 secs
+kubectl create job termination-30-sec --image=busybox --dry-run=client -o yaml -- /bin/sh -c 'while true;do echo running ...;sleep 5;done' > job-termination-30-sec.yaml
+kubectl apply -f job-termination-30-sec.yaml
+kubectl logs -f job/termination-30-sec
+kubectl delete job termination-30-sec
+

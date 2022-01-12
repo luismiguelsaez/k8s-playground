@@ -1,2 +1,8 @@
 
+
 for i in $(seq 1 3);do kubectl run nginx-$i --image nginx:1.19-alpine --restart=Never --labels=app=v1 ;done
+
+kubectl get pods -l app=v1 --show-labels
+
+kubectl label pod/nginx-2 app=v2 --overwrite
+

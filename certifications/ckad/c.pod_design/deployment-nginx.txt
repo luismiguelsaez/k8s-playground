@@ -1,0 +1,52 @@
+
+# Create initial manifest
+kubectl create deployment nginx --image=nginx:1.18.0 --dry-run=client -o yaml > deployment-nginx.yaml
+
+# Deploy
+kubectl apply -f deployment-nginx.yaml
+
+# Get deployment yaml
+kubectl get deployment nginx -o yaml
+
+# Get deployment replicaset yaml
+kubectl describe deployment nginx | grep -i newreplicaset
+kubectl get replicaset -l app=nginx
+kubectl get replicaset nginx-67dfd6c8f9 -o yaml
+
+# Get deployment rollout status
+kubectl rollout status deployment nginx
+
+# Update image in deployment
+kubectl set image deployment nginx nginx=nginx:1.19.8
+kubectl edit deployment nginx
+
+# Check rollout history
+kubectl rollout history deployment nginx
+
+# Rollback last rollout
+kubectl rollout undo deployment nginx 
+
+# Update with wrong replica
+kubectl set image deployment nginx nginx=nginx:1.31
+
+# Rollback to revision 2
+kubectl rollout undo deployment nginx --to-revision=2
+
+# Check revision 4 details
+kubectl rollout history deployment nginx --revision=4
+
+# Scale to 5 replicas
+kubectl scale deployment nginx --replicas=5
+
+# Create hpa
+kubectl autoscale deploy nginx --max=10 --min=5 --cpu-percent=80
+
+# Pause, update and resume rollout
+kubectl rollout pause deployment nginx
+kubectl set image deployment nginx nginx=nginx:1.19.9
+kubectl rollout resume deployment nginx
+
+# Delete created deployment and hpa
+kubectl delete hpa nginx
+kubectl delete deploy nginx
+

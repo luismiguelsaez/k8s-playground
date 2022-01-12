@@ -1,5 +1,5 @@
 
-kubectl apply -f pod-nginx.yaml
+kubectl apply -f pod-nginx-initcontainer.yaml
 kubectl logs nginx -c get
 kubectl get nginx -o yaml | grep podIp
 kubectl run wget --image=busybox --rm -it --command --restart=Never -- wget -O- 172.17.0.3

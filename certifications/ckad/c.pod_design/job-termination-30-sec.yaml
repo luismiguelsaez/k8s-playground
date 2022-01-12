@@ -1,0 +1,16 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: termination-30-sec
+spec:
+  activeDeadlineSeconds: 30
+  template:
+    spec:
+      containers:
+      - command:
+        - /bin/sh
+        - -c
+        - while true;do echo running ...;sleep 5;done
+        image: busybox
+        name: termination-30-sec
+      restartPolicy: Never

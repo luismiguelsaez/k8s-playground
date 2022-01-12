@@ -1,0 +1,21 @@
+
+# Create configmap with plain values
+kubectl create cm config --from-literal=foo=lala --from-literal=foo2=lolo
+
+# List configmap values
+kubectl get cm config -o yaml
+
+# Create configmap from file
+kubectl create cm config-file --from-file=values.data
+
+# Create configmap and assign to nginx pod
+kubectl create cm nginx --from-literal=HOSTNAME=test.io
+kubectl run nginx-configmap --image=nginx:1.20.1 --restart=OnFailure --dry-run=client -o yaml > pod-nginx-configmap.yaml
+kubectl apply -f pod-nginx-configmap.yaml
+kubectl exec -it nginx-configmap -- env | grep HOSTNAME
+
+# Create multi-value configmap and reference to environment
+kubectl create cm nginx-multi --from-literal=HOSTNAME=test.io --from-literal=DB_HOST=database.test.io
+kubectl run nginx-configmap-multi --image=nginx:1.20.1 --restart=OnFailure --dry-run=client -o yaml > pod-nginx-configmap-multi.yaml
+kubectl apply -f pod-nginx-configmap-multi.yaml
+kubectl exec -it nginx-configmap-multi -- env | egrep "(HOSTNAME|DB_HOST)"

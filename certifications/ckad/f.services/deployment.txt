@@ -1,0 +1,15 @@
+
+# Create minikube with CNI enabled for network policies to work
+minikube start --network-plugin=cni --enable-default-cni
+
+# Create and expose deployment
+kubectl create deployment nginx-policy --image=nginx:1.20.1-alpine --replicas=2 --port=80
+kubectl expose deploy nginx-policy --type=ClusterIP --port=80 --target-port=80
+
+# Create network policy
+kubectl apply -f networkpolicy.yaml
+
+# Test connection after network policy creation
+kubectl run test-denied --image=busybox --rm -it --restart=Never --command -- wget -O- http://nginx-policy --timeout 2
+kubectl run test-allowed --image=busybox --rm -it --restart=Never --command --labels=access=granted -- wget -O- http://nginx-policy --timeout 2
+

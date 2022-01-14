@@ -1,0 +1,4 @@
+
+# Test service ClusterIP
+IP=$(kubectl get svc nginx-service -o=jsonpath="{.spec.clusterIP}")
+kubectl run test-svc --image=busybox --restart=Never -it --rm --command -- wget -O- http://${IP}

@@ -1,0 +1,18 @@
+
+# Create deployment and service
+kubectl create deployment nginx --image=nginx:1.21.1-alpine --port=80                         
+kubectl expose deploy nginx --type=ClusterIP --port=80 --target-port=80
+
+# Test connection
+kubectl run test-connection --image=busybox --restart=Never -it --rm -- wget -O- http://nginx.default.svc
+
+# Scale to more replicas
+kubectl scale deploy nginx --replicas=3 
+
+# Apply network policy
+kubectl apply -f networkpolicy.yaml
+
+# Test connection
+kubectl get po -l app=nginx -o wide
+kubectl run test-connection --image=busybox --restart=Never -it --rm -l role=allow  -- wget -O- http://10.244.0.6
+

@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: myvolume-4g
+  labels:
+    app: test
+spec:
+  accessModes:
+  - ReadWriteOnce
+  storageClassName: normal
+  resources:
+    requests:
+      storage: 4Gi
+

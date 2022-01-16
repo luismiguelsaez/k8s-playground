@@ -1,0 +1,9 @@
+
+# Create pod with 2 container and shared volume
+kubectl apply -f pod-multi-emptydir.yaml
+
+# Put data into shared volume
+kubectl exec -it pod-multi-emptydir -c container-1 -- /bin/sh -c "cat /etc/passwd | cut -f1 -d: > /etc/foo/passwd"
+
+# Read data from container 2
+kubectl exec -it pod-multi-emptydir -c container-2 -- /bin/sh -c "cat /etc/foo/passwd"

@@ -15,4 +15,5 @@ kubectl apply -f networkpolicy.yaml
 # Test connection
 kubectl get po -l app=nginx -o wide
 kubectl run test-connection --image=busybox --restart=Never -it --rm -l role=allow  -- wget -O- http://10.244.0.6
+kubectl run test-connection --image=busybox --restart=Never -it --rm -l role=noallow  -- wget -O- http://10.8.26.219 --timeout 2
 

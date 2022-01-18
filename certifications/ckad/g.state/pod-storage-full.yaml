@@ -1,0 +1,85 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: hostvolume
+spec:
+  storageClassName: normal
+  accessModes:
+  - ReadWriteOnce
+  - ReadOnlyMany
+  hostPath:
+    path: /data/volume1
+  capacity:
+    storage: 5Gi
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: hostvolume-1
+spec:
+  storageClassName: normal
+  volumeName: hostvolume
+  accessModes:
+  - ReadWriteOnce
+  resources:
+    requests:
+      storage: 1Gi
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: multi-pod
+  name: multi-pod
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: multi-pod
+  template:
+    metadata:
+      labels:
+        app: multi-pod
+    spec:
+      initContainers:
+      - image: busybox
+        name: echoer
+        command:
+        - /bin/sh
+        args:
+        - -c
+        - "echo TEST > /data/index.html"
+        volumeMounts:
+        - name: data
+          mountPath: /data
+      containers:
+      - image: nginx:1.21.1-alpine
+        name: nginx
+        ports:
+        - containerPort: 80
+        volumeMounts:
+        - name: data
+          mountPath: /usr/share/nginx/html
+      volumes:
+      - name: data
+        persistentVolumeClaim:
+          claimName: hostvolume-1
+---
+apiVersion: v1
+kind: Service
+metadata:
+  creationTimestamp: null
+  labels:
+    app: multi-pod
+  name: multi-pod
+spec:
+  ports:
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+  selector:
+    app: multi-pod
+  type: ClusterIP
+status:
+  loadBalancer: {}
+

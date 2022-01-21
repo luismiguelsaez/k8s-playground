@@ -76,3 +76,10 @@ k run test --image=busybox --restart=Never -it --rm -l allow-http=true --command
   ETag: "61cb2d26-267"
   Accept-Ranges: bytes
 ```
+
+## Cleanup
+```
+k delete svc nginx
+k delete po nginx --grace-period=0 --force
+k delete -f networkpolicy.yaml
+```

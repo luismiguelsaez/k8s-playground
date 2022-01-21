@@ -96,3 +96,10 @@ Connecting to 10.244.0.145 (10.244.0.145:80)
 writing to stdout
 TESTING VOLUMES
 ```
+
+## Cleanup
+```
+k delete po pod-pv --grace-period=0 --force
+k delete pvc ckad-test                     
+k delete pv ckad-test
+```

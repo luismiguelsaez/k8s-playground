@@ -1,0 +1,54 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  creationTimestamp: null
+  labels:
+    app: fluentd
+  name: fluentd
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fluentd
+  strategy: {}
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: fluentd
+    spec:
+      containers:
+      - image: fluentd:v1.14-1
+        name: fluentd
+        args:
+        - -c
+        - /etc/fluentd/fluent.conf
+        resources:
+          requests:
+            memory: 100Mi
+            cpu: 100m
+          limits:
+            memory: 150Mi
+            cpu: 200m 
+        volumeMounts:
+        - name: logs
+          mountPath: /data/log
+        - name: fluentd-conf
+          mountPath: /etc/fluentd
+      - image: busybox
+        name: logger
+        command:
+        - /bin/sh
+        args:
+        - -c
+        - "while true;do echo 'Printing output from logger container' >> /data/log/access.log;sleep 5;done"
+        volumeMounts:
+        - name: logs
+          mountPath: /data/log
+      volumes:
+      - name: logs
+        emptyDir: {}
+      - name: fluentd-conf
+        configMap:
+          name: fluentd
+status: {}

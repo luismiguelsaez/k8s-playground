@@ -4,5 +4,5 @@
 - URL: https://training.linuxfoundation.org/certification/certified-kubernetes-administrator-cka/
 ## Create a cluster
 ```
-minikube start --cni=cilium --kubernetes-version=1.22.3
+minikube start --cni=cilium --kubernetes-version=1.22.3 --driver=virtualbox --nodes=3 --container-runtime=containerd 
 ```

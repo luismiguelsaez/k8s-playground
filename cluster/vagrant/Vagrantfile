@@ -10,8 +10,7 @@ k8s_control = {
 }
 
 k8s_worker = {
-  "worker-01" => { :ip => "192.168.56.11", :cpus => 1, :mem => 1024 },
-  "worker-02" => { :ip => "192.168.56.12", :cpus => 1, :mem => 1024 },
+  "worker-01" => { :ip => "192.168.56.11", :cpus => 1, :mem => 1024 }
 }
 
 $install_packages = <<-'SCRIPT'
@@ -31,11 +30,9 @@ swapoff -a
 
 modprobe br_netfilter
 echo br_netfilter >> /etc/modules-load.d/modules.conf
-
 echo net.bridge.bridge-nf-call-ip6tables=1 >> /etc/sysctl.d/kubernetes.conf
 echo net.bridge.bridge-nf-call-iptables=1  >> /etc/sysctl.d/kubernetes.conf
 echo net.ipv4.ip_forward=1                 >> /etc/sysctl.d/kubernetes.conf
-
 sysctl --system
 
 systemctl enable kubelet
@@ -48,16 +45,24 @@ $init_master = <<-'SCRIPT'
 set -e
 
 kubeadm config images pull
-kubeadm init --kubernetes-version ${K8S_VERSION} --pod-network-cidr=10.244.0.0/16 --apiserver-advertise-address 192.168.56.4
+kubeadm init --kubernetes-version ${K8S_VERSION} --token ppozut.y9dh2r1bdowfay3x --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/16 --apiserver-advertise-address 192.168.56.4
 
-export KUBECONFIG=/etc/kubernetes/admin.conf
-kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
+cp /etc/kubernetes/admin.conf ~/.kube/config
+
+curl -sL https://get.helm.sh/helm-v3.8.0-linux-amd64.tar.gz | tar -xz linux-amd64/helm
+linux-amd64/helm repo add cilium https://helm.cilium.io/
+linux-amd64/helm install cilium cilium/cilium --version 1.11.1 --namespace kube-system --wait
+
 kubectl wait pod --for condition=ready --all -n kube-system --timeout=300s
 
 # kubeadm token create --print-join-command
 # Fix wrong internal ip
 # /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
 # --node-ip=<IP>
+SCRIPT
+
+$init_worker = <<-'SCRIPT'
+kubeadm join 192.168.56.4:6443 --token ppozut.y9dh2r1bdowfay3x --discovery-token-unsafe-skip-ca-verification
 SCRIPT
 
 

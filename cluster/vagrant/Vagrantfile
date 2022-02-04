@@ -3,6 +3,8 @@
 
 VAGRANTFILE_API_VERSION = "2"
 
+k8s_version = "1.18.9-00"
+
 k8s_control = {
   "control-01" => { :ip => "192.168.56.4", :cpus => 2, :mem => 2048 }
 }
@@ -18,7 +20,7 @@ apt-get install -y apt-transport-https ca-certificates curl
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
 apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
 apt-get update -y
-apt-get install -y containerd kubelet=1.23.3-00 kubeadm=1.23.3-00 kubectl=1.23.3-00
+apt-get install -y --allow-change-held-packages containerd kubelet=${K8S_VERSION} kubeadm=${K8S_VERSION} kubectl=${K8S_VERSION}
 apt-mark hold kubelet kubeadm kubectl
 
 swapoff -a
@@ -43,7 +45,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.customize ["modifyvm", :id, "--memory", info[:mem], "--cpus", info[:cpus], "--hwvirtex", "on"]
       end
 
-      cfg.vm.provision "shell", inline: $install_packages
+      cfg.vm.provision "shell", inline: $install_packages, env: {"K8S_VERSION" => "#{k8s_version}"}
       cfg.vm.provision "shell", inline: $init_master
 
     end
@@ -63,7 +65,7 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.customize ["modifyvm", :id, "--memory", info[:mem], "--cpus", info[:cpus], "--hwvirtex", "on"]
       end
 
-      cfg.vm.provision "shell", inline: $install_packages
+      cfg.vm.provision "shell", inline: $install_packages, env: {"K8S_VERSION" => "#{k8s_version}"}
 
     end
 

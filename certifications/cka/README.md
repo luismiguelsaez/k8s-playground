@@ -24,3 +24,8 @@ minikube-m03   Ready    <none>                 3m42s   v1.22.3
 ```
 minikube ssh -n minikube-m02
 ```
+
+## Exercises and references
+
+- https://www.katacoda.com/djkormo
+- https://github.com/alijahnas/CKA-practice-exercises

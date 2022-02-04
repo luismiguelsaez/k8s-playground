@@ -1,0 +1,72 @@
+# -*- mode: ruby -*-
+# vi: set ft=ruby :
+
+VAGRANTFILE_API_VERSION = "2"
+
+k8s_control = {
+  "control-01" => { :ip => "192.168.56.4", :cpus => 2, :mem => 2048 }
+}
+
+k8s_worker = {
+  "worker-01" => { :ip => "192.168.56.11", :cpus => 1, :mem => 1024 }
+}
+
+$install_packages = <<-'SCRIPT'
+apt-get update -y
+apt-get install -y apt-transport-https ca-certificates curl
+
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
+apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
+apt-get update -y
+apt-get install -y containerd kubelet=1.23.3-00 kubeadm=1.23.3-00 kubectl=1.23.3-00
+apt-mark hold kubelet kubeadm kubectl
+
+swapoff -a
+SCRIPT
+
+$init_master = <<-'SCRIPT'
+kubeadm init
+SCRIPT
+
+Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
+
+  k8s_control.each_with_index do |(hostname, info), index|
+
+    config.vm.define hostname do |cfg|
+
+      cfg.vm.provider :virtualbox do |vb, override|
+        config.vm.box = "ubuntu/focal64"
+        override.vm.network :private_network, ip: "#{info[:ip]}"
+        override.vm.hostname = hostname
+        vb.gui = false
+        vb.name = hostname
+        vb.customize ["modifyvm", :id, "--memory", info[:mem], "--cpus", info[:cpus], "--hwvirtex", "on"]
+      end
+
+      cfg.vm.provision "shell", inline: $install_packages
+      cfg.vm.provision "shell", inline: $init_master
+
+    end
+
+  end
+
+  k8s_worker.each_with_index do |(hostname, info), index|
+
+    config.vm.define hostname do |cfg|
+
+      cfg.vm.provider :virtualbox do |vb, override|
+        config.vm.box = "ubuntu/focal64"
+        override.vm.network :private_network, ip: "#{info[:ip]}"
+        override.vm.hostname = hostname
+        vb.gui = false
+        vb.name = hostname
+        vb.customize ["modifyvm", :id, "--memory", info[:mem], "--cpus", info[:cpus], "--hwvirtex", "on"]
+      end
+
+      cfg.vm.provision "shell", inline: $install_packages
+
+    end
+
+  end
+
+end

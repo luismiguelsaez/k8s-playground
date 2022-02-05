@@ -73,4 +73,4 @@ do
     fi
 done
 
-multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -- sudo cat /etc/kubernetes/admin.conf > ~/.kube/kubeadm-cluster.conf
+multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-1 -- sudo cat /etc/kubernetes/admin.conf > ~/.kube/kubeadm-cluster.conf

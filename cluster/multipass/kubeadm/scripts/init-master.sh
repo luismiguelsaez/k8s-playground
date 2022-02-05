@@ -16,3 +16,10 @@ sudo chown -R $(id -u).$(id -u) ~/.kube
 # Flannel networking plugin
 kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
 kubectl wait pod --for condition=ready --all -n kube-system --timeout=300s
+
+# Install metrics server
+curl -sL https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml | yq 'select(.kind == "Deployment")|.spec.template.spec.containers[0].args += "--kubelet-insecure-tls"'
+
+# Install tools
+sudo curl -sL https://github.com/mikefarah/yq/releases/download/v4.18.1/yq_linux_amd64 -o /usr/local/bin/yq
+sudo chmod +x /usr/local/bin/*

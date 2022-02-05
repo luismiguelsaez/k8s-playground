@@ -88,9 +88,19 @@ write_files:
     append: true
     content: |
       K8S_VERSION="1.18.9"
+  - path: /etc/crictl.yaml
+    append: false
+    content: |
+      runtime-endpoint: unix:///var/run/containerd/containerd.sock
+      image-endpoint: unix:///var/run/containerd/containerd.sock
+      timeout: 2
+      debug: false
+      pull-image-on-create: false
 runcmd:
   - [ sysctl, --system ]
   - [ modprobe, overlay ]
   - [ modprobe, br_netfilter ]
   - [ systemctl, daemon-reload ]
   - [ systemctl, enable, kubelet.service ]
+  - [ mkdir, -p, /etc/containerd ]
+  - [ containerd, config, default, ">", /etc/containerd/config.toml ]

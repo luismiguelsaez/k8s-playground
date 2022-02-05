@@ -18,7 +18,7 @@ do
     if [ -z "$NODE_STATUS" ]
     then
         echo -ne "\e[37mCreating control node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ... \e[0m"
-        multipass launch ${OS_VERS} -n ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -c 2 -m 2048M  -d 20G --cloud-init cloud-config.yaml #>/dev/null 2>&1
+        multipass launch ${OS_VERS} -n ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -c 2 -m 2048M  -d 20G --cloud-init cloud-config.yaml >/dev/null 2>&1
         if [ $? -eq 0 ]
         then
             echo -e "\e[32mOK\e[0m"

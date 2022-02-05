@@ -35,7 +35,7 @@ do
             echo -e "\e[31mERROR\e[0m"
         fi
 
-        echo -e "\e[37mProvisioning control node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ...\e[0m"
+        echo -ne "\e[37mProvisioning control node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ...\e[0m"
         PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} bash /scripts/init-master.sh ${K8S_VERS})
         if [ $? -eq 0 ]
         then

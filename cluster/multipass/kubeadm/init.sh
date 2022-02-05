@@ -26,7 +26,14 @@ do
             echo -e "\e[31mERROR\e[0m"
         fi
 
-        multipass mount scripts ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}:/scripts
+        echo -ne "\e[37mMounting scripts in control node ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} ... \e[0m"
+        multipass mount scripts ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}:/scripts >/dev/null 2>&1
+        if [ $? -eq 0 ]
+        then
+            echo -e "\e[32mOK\e[0m"
+        else
+            echo -e "\e[31mERROR\e[0m"
+        fi
 
         echo -e "\e[37mProvisioning control node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ...\e[0m"
         multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} bash /scripts/init-master.sh ${K8S_VERS}
@@ -58,7 +65,14 @@ do
             echo -e "\e[31mERROR\e[0m"
         fi
 
-        multipass mount scripts ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}:/scripts
+        echo -ne "\e[37mMounting scripts in worker node ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} ... \e[0m"
+        multipass mount scripts ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}:/scripts  >/dev/null 2>&1
+        if [ $? -eq 0 ]
+        then
+            echo -e "\e[32mOK\e[0m"
+        else
+            echo -e "\e[31mERROR\e[0m"
+        fi
 
         echo -e "\e[37mProvisioning worker node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ...\e[0m"
         multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} bash /scripts/init-worker.sh ${MASTER_IP}:6443

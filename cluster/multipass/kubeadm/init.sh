@@ -17,7 +17,7 @@ do
 
     if [ -z "$NODE_STATUS" ]
     then
-        echo -ne "\e[37mCreating control node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ... \e[0m"
+        echo -ne "\e[37mCreating control node \e[34m${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}\e[0m ... \e[0m"
         multipass launch ${OS_VERS} -n ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -c 2 -m 2048M  -d 20G --cloud-init cloud-config.yaml >/dev/null 2>&1
         if [ $? -eq 0 ]
         then
@@ -36,7 +36,13 @@ do
         fi
 
         echo -e "\e[37mProvisioning control node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ...\e[0m"
-        multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} bash /scripts/init-master.sh ${K8S_VERS}
+        PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} bash /scripts/init-master.sh ${K8S_VERS})
+        if [ $? -eq 0 ]
+        then
+            echo -e "\e[32mOK\e[0m"
+        else
+            echo -e "\e[31mERROR\e[0m"
+        fi
     else
         if [ "$( echo $NODE_STATUS | awk '{print $2;}' )" == "Stopped" ]
         then
@@ -56,7 +62,7 @@ do
 
     if [ -z "$NODE_STATUS" ]
     then
-        echo -ne "\e[37mCreating control node ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} ... \e[0m"
+        echo -ne "\e[37mCreating worker node \e[35m${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}\e[0m ... \e[0m"
         multipass launch ${OS_VERS} -n ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -c 1 -m 1024M  -d 20G --cloud-init cloud-config.yaml >/dev/null 2>&1
         if [ $? -eq 0 ]
         then
@@ -74,8 +80,14 @@ do
             echo -e "\e[31mERROR\e[0m"
         fi
 
-        echo -e "\e[37mProvisioning worker node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ...\e[0m"
-        multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} bash /scripts/init-worker.sh ${MASTER_IP}:6443
+        echo -ne "\e[37mProvisioning worker node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ...\e[0m"
+        PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} bash /scripts/init-worker.sh ${MASTER_IP}:6443)
+        if [ $? -eq 0 ]
+        then
+            echo -e "\e[32mOK\e[0m"
+        else
+            echo -e "\e[31mERROR\e[0m"
+        fi
     else
         if [ "$( echo $NODE_STATUS | awk '{print $2;}' )" == "Stopped" ]
         then

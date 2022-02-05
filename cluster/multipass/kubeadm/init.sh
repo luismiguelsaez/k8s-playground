@@ -57,4 +57,4 @@ do
 done
 
 mkdir ~/.kube
-multipass exec kubeadm-control-01 -- sudo cat /etc/kubernetes/admin.conf > ~.kube/kubeadm-cluster.conf
+multipass exec kubeadm-control-01 -- sudo cat /etc/kubernetes/admin.conf > ~/.kube/kubeadm-cluster.conf

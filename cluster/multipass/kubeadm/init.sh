@@ -27,5 +27,8 @@ multipass launch 20.04 -n kubeadm-control-01 -c 2 -m 2048M -d 20G --cloud-init c
 multipass mount scripts kubeadm-control-01:/scripts
 multipass exec kubeadm-control-01 bash /scripts/init-master.sh 1.18.9
 
+MASTER_IP=$(multipass info kubeadm-control-01 | awk '/^IPv4/{print $2}')
+
+multipass launch 20.04 -n kubeadm-worker-01 -c 1 -m 1024M -d 20G --cloud-init cloud-config.yaml
 multipass mount scripts kubeadm-worker-01:/scripts
-multipass exec kubeadm-worker-01 bash /scripts/init-worker.sh 1.18.9
+multipass exec kubeadm-worker-01 bash /scripts/init-worker.sh ${MASTER_IP}

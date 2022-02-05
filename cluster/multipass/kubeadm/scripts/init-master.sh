@@ -7,7 +7,7 @@ sudo sed -i s/.*$HOSTNAME.*//g /etc/hosts
 echo "$IP $HOSTNAME" | sudo tee -a /etc/hosts
 
 sudo kubeadm config images pull
-sudo kubeadm init --kubernetes-version ${K8S_VERSION} --token ppozut.y9dh2r1bdowfay3x --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/16 --apiserver-advertise-address 192.168.56.4
+sudo kubeadm init --kubernetes-version ${K8S_VERSION} --token ppozut.y9dh2r1bdowfay3x --pod-network-cidr=10.244.0.0/16
 
 mkdir ~/.kube
 sudo cp /etc/kubernetes/admin.conf ~/.kube/config

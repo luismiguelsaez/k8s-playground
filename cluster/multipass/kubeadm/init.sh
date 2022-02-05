@@ -19,7 +19,12 @@ do
     then
         echo -ne "\e[37mCreating control node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ... \e[0m"
         multipass launch ${OS_VERS} -n ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -c 2 -m 2048M  -d 20G --cloud-init cloud-config.yaml #>/dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "\e[32mOK\e[0m" || echo -e "\e[31mERROR\e[0m"
+        if [ $? -eq 0 ]
+        then
+            echo -e "\e[32mOK\e[0m"
+        else
+            echo -e "\e[31mERROR\e[0m"
+        fi
 
         multipass mount scripts ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}:/scripts
 
@@ -46,7 +51,12 @@ do
     then
         echo -ne "\e[37mCreating control node ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} ... \e[0m"
         multipass launch ${OS_VERS} -n ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -c 1 -m 1024M  -d 20G --cloud-init cloud-config.yaml >/dev/null 2>&1
-        [ $? -eq 0 ] && echo -e "\e[32mOK\e[0m" || echo -e "\e[31mERROR\e[0m"
+        if [ $? -eq 0 ]
+        then
+            echo -e "\e[32mOK\e[0m"
+        else
+            echo -e "\e[31mERROR\e[0m"
+        fi
 
         multipass mount scripts ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}:/scripts
 
@@ -63,5 +73,4 @@ do
     fi
 done
 
-mkdir ~/.kube
-multipass exec kubeadm-control-01 -- sudo cat /etc/kubernetes/admin.conf > ~/.kube/kubeadm-cluster.conf
+multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -- sudo cat /etc/kubernetes/admin.conf > ~/.kube/kubeadm-cluster.conf

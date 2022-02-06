@@ -86,7 +86,7 @@ do
             echo "${MOUNT_OUT}"
         fi
 
-        echo -ne "\e[37mProvisioning worker node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ... \e[0m"
+        echo -ne "\e[37mProvisioning worker node ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} ... \e[0m"
         PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- bash /scripts/init-worker.sh ${MASTER_IP}:6443 2>&1)
         if [ $? -eq 0 ]
         then

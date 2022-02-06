@@ -104,4 +104,4 @@ runcmd:
   - [ systemctl, enable, kubelet.service ]
   - [ mkdir, -p, /etc/containerd ]
   - [ containerd, config, default, ">", /etc/containerd/config.toml ]
-  - [ apt-mark, hold, kubelet=1.19.16-00, kubectl=1.19.16-00, kubeadm=1.19.16-00 ]
+  - [ apt-mark, hold, kubelet, kubectl, kubeadm ]

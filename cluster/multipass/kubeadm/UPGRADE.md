@@ -3,21 +3,36 @@
 
 ## Check available versions
 ```
-apt-cache policy kubeadm | grep "1.19"
+apt-cache policy kubeadm | grep "1.20"
+```
+## Drain node(s)
+```
+k get no
+NAME                STATUS   ROLES    AGE   VERSION
+kubeadm-control-1   Ready    master   21m   v1.19.16
+kubeadm-worker-1    Ready    <none>   13m   v1.19.16
+kubeadm-worker-2    Ready    <none>   11m   v1.19.16
+
+k drain kubeadm-control-1 --ignore-daemonsets
+k cordon kubeadm-control-1
 ```
 ## Upgrade `kubeadm` package(s)
 ```
-sudo apt-get install kubeadm=1.19.16-00 kubectl=1.19.16-00 kubelet=1.19.16-00
+sudo apt-get install -y kubeadm=1.20.15-00
 ```
-## Drain node
+## Check version
 ```
-kubectl drain kubeadm-control-01
-kubectl cordon kubeadm-control-01
+kubeadm version -o short
+v1.20.15
 ```
-## Get plan and upgrade `kubeadm`
+## Get plan and upgrade
 ```
 sudo kubeadm upgrade plan
-sudo kubeadm upgrade apply v1.19.16
+sudo kubeadm upgrade apply v1.20.15
+```
+## Upgrade remaining packages
+```
+sudo apt-get install -y kubelet=1.20.15-00 kubectl=1.20.15-00
 ```
 ## Restart `kubelet` service
 ```
@@ -32,13 +47,26 @@ kubeadm uncordon kubeadm-control-01
 
 # WORKER NODES
 ## Drain and cordon node
+```
+k drain kubeadm-worker-1 --ignore-daemonsets
+k cordon kubeadm-worker-1
+```
 ## Upgrade `kubeadm` package(s)
 ```
-sudo apt-get install kubeadm=1.19.16-00 kubectl=1.19.16-00 kubelet=1.19.16-00
+sudo apt-get install -y kubeadm=1.20.15-00
+```
+## Check version
+```
+kubeadm version -o short
+v1.20.15
 ```
 ## Upgrade components
 ```
 sudo kubeadm upgrade node
+```
+## Upgrade remaining packages
+```
+sudo apt-get install -y kubelet=1.20.15-00 kubectl=1.20.15-00
 ```
 ## Restart `kubelet` service
 ```
@@ -47,10 +75,6 @@ sudo systemctl restart kubelet.service
 sudo journalctl -fu kubelet
 ```
 ## Uncordon node
-
-# TEST CLUSTER
 ```
-kubectl create deploy nginx --image=nginx:1.21-alpine --replicas=4 --port=80
-kubectl expose deploy nginx --port=8080 --target-port=80
-kubectl run test-connection --image=busybox -it --rm --restart=Never -- wget -O- --timeout=2 http://nginx.default.svc.cluster.local:8080
+k uncordon kubeadm-worker-1
 ```

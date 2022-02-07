@@ -9,9 +9,17 @@ echo "$IP $HOSTNAME" | sudo tee -a /etc/hosts
 sudo kubeadm config images pull
 sudo kubeadm init --kubernetes-version ${K8S_VERSION} --token ppozut.y9dh2r1bdowfay3x --pod-network-cidr=192.168.0.0/16
 
+# Setup shell
 mkdir ~/.kube
 sudo cp /etc/kubernetes/admin.conf ~/.kube/config
 sudo chown -R $(id -u).$(id -u) ~/.kube
+
+cat << EOF >> ~/.bashrc
+# kubectl command setup
+alias k="kubectl"
+source <(kubectl completion bash)
+complete -F __start_kubectl k
+EOF
 
 # Flannel networking plugin
 #kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml

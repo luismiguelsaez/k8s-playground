@@ -29,7 +29,10 @@ do
         fi
 
         echo -ne "\e[37mMounting scripts in control node ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} ... \e[0m"
-        MOUNT_OUT=$( multipass mount scripts ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}:/scripts 2>&1 )
+        MOUNT_OUT=$( 
+            multipass mount scripts ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}:/scripts 2>&1
+            multipass mount manifests ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}:/manifests 2>&1 
+        )
         if [ $? -eq 0 ]
         then
             echo -e "\e[32mOK\e[0m"

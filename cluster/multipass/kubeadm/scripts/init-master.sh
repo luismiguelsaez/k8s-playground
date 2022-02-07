@@ -7,7 +7,7 @@ sudo sed -i s/.*$HOSTNAME.*//g /etc/hosts
 echo "$IP $HOSTNAME" | sudo tee -a /etc/hosts
 
 sudo kubeadm config images pull
-sudo kubeadm init --kubernetes-version ${K8S_VERSION} --token ppozut.y9dh2r1bdowfay3x --pod-network-cidr=10.244.0.0/16
+sudo kubeadm init --kubernetes-version ${K8S_VERSION} --token ppozut.y9dh2r1bdowfay3x --pod-network-cidr=192.168.0.0/16
 
 mkdir ~/.kube
 sudo cp /etc/kubernetes/admin.conf ~/.kube/config
@@ -18,8 +18,7 @@ sudo chown -R $(id -u).$(id -u) ~/.kube
 #kubectl wait pod --for condition=ready --all -n kube-system --timeout=300s
 
 # Calico CNI ( https://projectcalico.docs.tigera.io/getting-started/kubernetes/quickstart )
-kubectl create -f https://projectcalico.docs.tigera.io/manifests/tigera-operator.yaml
-kubectl create -f https://projectcalico.docs.tigera.io/manifests/custom-resources.yaml
+kubectl create -f https://docs.projectcalico.org/manifests/calico-typha.yaml -o calico.yaml
 
 # Install tools
 #sudo curl -sL https://github.com/mikefarah/yq/releases/download/v4.18.1/yq_linux_amd64 -o /usr/local/bin/yq

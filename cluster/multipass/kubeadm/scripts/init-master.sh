@@ -14,12 +14,16 @@ sudo cp /etc/kubernetes/admin.conf ~/.kube/config
 sudo chown -R $(id -u).$(id -u) ~/.kube
 
 # Flannel networking plugin
-kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
+#kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
 #kubectl wait pod --for condition=ready --all -n kube-system --timeout=300s
 
+# Calico CNI ( https://projectcalico.docs.tigera.io/getting-started/kubernetes/quickstart )
+kubectl create -f https://projectcalico.docs.tigera.io/manifests/tigera-operator.yaml
+kubectl create -f https://projectcalico.docs.tigera.io/manifests/custom-resources.yaml
+
 # Install tools
-sudo curl -sL https://github.com/mikefarah/yq/releases/download/v4.18.1/yq_linux_amd64 -o /usr/local/bin/yq
-sudo chmod +x /usr/local/bin/*
+#sudo curl -sL https://github.com/mikefarah/yq/releases/download/v4.18.1/yq_linux_amd64 -o /usr/local/bin/yq
+#sudo chmod +x /usr/local/bin/*
 
 # Install metrics server
 #curl -sL https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml | yq 'select(.kind == "Deployment")|.spec.template.spec.containers[0].args += "--kubelet-insecure-tls"'

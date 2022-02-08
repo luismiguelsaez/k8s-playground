@@ -26,7 +26,7 @@ EOF
 #kubectl wait pod --for condition=ready --all -n kube-system --timeout=300s
 
 # Calico CNI ( https://projectcalico.docs.tigera.io/getting-started/kubernetes/quickstart )
-kubectl create -f https://docs.projectcalico.org/manifests/calico-typha.yaml -o calico.yaml
+kubectl create -f https://docs.projectcalico.org/manifests/calico-typha.yaml
 
 # Install tools
 #sudo curl -sL https://github.com/mikefarah/yq/releases/download/v4.18.1/yq_linux_amd64 -o /usr/local/bin/yq

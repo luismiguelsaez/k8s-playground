@@ -7,8 +7,16 @@ echo "Initializing master node [${HOSTNAME}:${NODE_IP}]: ${K8S_VERSION}"
 kubeadm config images pull
 kubeadm init --kubernetes-version ${K8S_VERSION} --node-name ${HOSTNAME} --apiserver-cert-extra-sans=${NODE_IP} --token ppozut.y9dh2r1bdowfay3x --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/16 --apiserver-advertise-address 192.168.56.4
 
-mkdir ~/.kube
-cp /etc/kubernetes/admin.conf ~/.kube/config
+su - vagrant -c "mkdir ~/.kube"
+cp /etc/kubernetes/admin.conf /home/vagrant/.kube/config
+chown -R $(id -u vagrant).$(id -u vagrant) /home/vagrant/.kube/config
+
+cat << EOF >> /home/vagrant/.bashrc
+# kubectl command setup
+alias k="kubectl"
+source <(kubectl completion bash)
+complete -F __start_kubectl k
+EOF
 
 # Cilium networking plutin
 #curl -sL https://get.helm.sh/helm-v3.8.0-linux-amd64.tar.gz | tar -xz linux-amd64/helm

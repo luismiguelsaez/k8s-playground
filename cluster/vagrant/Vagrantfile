@@ -40,18 +40,18 @@ systemctl enable kubelet
 
 ADDR=$(ip -o -4 address show dev enp0s8 | awk '{split($4,a,"/");print a[1]}')
 echo "KUBELET_EXTRA_ARGS='--node-ip=${ADDR} --network-plugin=cni'" > /etc/default/kubelet
-SCRIPT
-
-$init_master = <<-'SCRIPT'
-set -e
 
 sed -i s/.*${HOSTNAME}.*//g /etc/hosts
 echo "192.168.56.4 control-01" >> /etc/hosts
 echo "192.168.56.11 worker-01" >> /etc/hosts
 echo "192.168.56.12 worker-01" >> /etc/hosts
+SCRIPT
+
+$init_master = <<-'SCRIPT'
+set -e
 
 kubeadm config images pull
-kubeadm init --kubernetes-version ${K8S_VERSION} --token ppozut.y9dh2r1bdowfay3x --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/16 --apiserver-advertise-address 192.168.56.4
+kubeadm init --kubernetes-version ${K8S_VERSION} --node-name ${HOSTNAME} --apiserver-cert-extra-sans=${NODE_IP} --token ppozut.y9dh2r1bdowfay3x --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/16 --apiserver-advertise-address 192.168.56.4
 
 mkdir ~/.kube
 cp /etc/kubernetes/admin.conf ~/.kube/config
@@ -62,9 +62,12 @@ cp /etc/kubernetes/admin.conf ~/.kube/config
 #linux-amd64/helm install cilium cilium/cilium --version 1.11.1 --namespace kube-system --wait
 
 # Flannel networking plugin
-kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
+#kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
 #kubectl create -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel-rbac.yml
-kubectl wait pod --for condition=ready --all -n kube-system --timeout=300s
+#kubectl wait pod --for condition=ready --all -n kube-system --timeout=300s
+
+# Calico
+kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
 
 # kubeadm token create --print-join-command
 # Fix wrong internal ip
@@ -90,10 +93,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.gui = false
         vb.name = hostname
         vb.customize ["modifyvm", :id, "--memory", info[:mem], "--cpus", info[:cpus], "--hwvirtex", "on"]
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       end
 
-      cfg.vm.provision "shell", inline: $install_packages, env: {"K8S_VERSION" => "#{k8s_version}", "HOSTNAME" => "#{hostname}"}
-      cfg.vm.provision "shell", inline: $init_master, env: {"K8S_VERSION" => "#{k8s_version}", "HOSTNAME" => "#{hostname}"}
+      cfg.vm.provision "shell", inline: $install_packages, env: {"K8S_VERSION" => "#{k8s_version}", "HOSTNAME" => "#{hostname}", "NODE_IP" => "#{info[:ip]}"}
+      cfg.vm.provision "shell", inline: $init_master, env: {"K8S_VERSION" => "#{k8s_version}", "HOSTNAME" => "#{hostname}", "NODE_IP" => "#{info[:ip]}"}
 
     end
 
@@ -110,10 +114,11 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.gui = false
         vb.name = hostname
         vb.customize ["modifyvm", :id, "--memory", info[:mem], "--cpus", info[:cpus], "--hwvirtex", "on"]
+        vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       end
 
-      cfg.vm.provision "shell", inline: $install_packages, env: {"K8S_VERSION" => "#{k8s_version}", "HOSTNAME" => "#{hostname}"}
-      cfg.vm.provision "shell", inline: $init_worker, env: {"K8S_VERSION" => "#{k8s_version}", "HOSTNAME" => "#{hostname}"}
+      cfg.vm.provision "shell", inline: $install_packages, env: {"K8S_VERSION" => "#{k8s_version}", "HOSTNAME" => "#{hostname}", "NODE_IP" => "#{info[:ip]}"}
+      cfg.vm.provision "shell", inline: $init_worker, env: {"K8S_VERSION" => "#{k8s_version}", "HOSTNAME" => "#{hostname}", "NODE_IP" => "#{info[:ip]}"}
 
     end
 

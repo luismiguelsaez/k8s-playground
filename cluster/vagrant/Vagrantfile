@@ -38,8 +38,8 @@ sysctl --system
 
 systemctl enable kubelet
 
-ADDR=$(ip -o -4 address show dev enp0s8 | awk '{split($4,a,"/");print a[1]}')
-echo "KUBELET_EXTRA_ARGS='--node-ip=${ADDR} --network-plugin=cni'" > /etc/default/kubelet
+#ADDR=$(ip -o -4 address show dev enp0s8 | awk '{split($4,a,"/");print a[1]}')
+echo "KUBELET_EXTRA_ARGS='--node-ip=${NODE_IP} --network-plugin=cni'" > /etc/default/kubelet
 
 sed -i s/.*${HOSTNAME}.*//g /etc/hosts
 echo "192.168.56.4 control-01" >> /etc/hosts

@@ -18,9 +18,13 @@ swapoff -a
 
 modprobe br_netfilter
 echo br_netfilter >> /etc/modules-load.d/modules.conf
-echo net.bridge.bridge-nf-call-ip6tables=1 >> /etc/sysctl.d/kubernetes.conf
-echo net.bridge.bridge-nf-call-iptables=1  >> /etc/sysctl.d/kubernetes.conf
-echo net.ipv4.ip_forward=1                 >> /etc/sysctl.d/kubernetes.conf
+
+cat << EOF > /etc/sysctl.d/kubernetes.conf
+net.bridge.bridge-nf-call-ip6tables=1
+net.bridge.bridge-nf-call-iptables=1 
+net.ipv4.ip_forward=1                
+EOF
+
 sysctl --system
 
 systemctl enable kubelet

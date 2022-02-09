@@ -18,6 +18,13 @@ source <(kubectl completion bash)
 complete -F __start_kubectl k
 EOF
 
+# Install tools
+
+## etcdctl
+curl -sL https://github.com/etcd-io/etcd/releases/download/v3.5.2/etcd-v3.5.2-linux-arm64.tar.gz | tar --transform 's/^etcd-.*linux-arm64//' -xzvf - etcd-v3.5.2-linux-arm64/etcdctl -C /tmp/
+mv ./etcdctl /usr/local/bin/
+chmod +x /usr/local/bin/etcdctl
+
 # Cilium networking plutin
 #curl -sL https://get.helm.sh/helm-v3.8.0-linux-amd64.tar.gz | tar -xz linux-amd64/helm
 #linux-amd64/helm repo add cilium https://helm.cilium.io/

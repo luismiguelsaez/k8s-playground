@@ -3,7 +3,7 @@
 set -e
 
 echo "Installing K8s packages [${HOSTNAME}:${NODE_IP}]: ${K8S_VERSION}"
-exit 0
+
 apt-get update -y
 apt-get install -y apt-transport-https ca-certificates curl
 

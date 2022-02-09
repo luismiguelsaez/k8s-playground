@@ -14,80 +14,6 @@ k8s_worker = {
   "worker-02" => { :ip => "192.168.56.12", :cpus => 1, :mem => 1024 }
 }
 
-$install_packages = <<-'SCRIPT'
-set -e
-
-apt-get update -y
-apt-get install -y apt-transport-https ca-certificates curl
-
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
-apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"
-apt-get update -y
-apt-get install -y --allow-change-held-packages containerd kubelet=${K8S_VERSION}-00 kubeadm=${K8S_VERSION}-00 kubectl=${K8S_VERSION}-00
-apt-mark hold kubelet kubeadm kubectl
-
-sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
-swapoff -a
-
-modprobe br_netfilter
-echo br_netfilter >> /etc/modules-load.d/modules.conf
-echo net.bridge.bridge-nf-call-ip6tables=1 >> /etc/sysctl.d/kubernetes.conf
-echo net.bridge.bridge-nf-call-iptables=1  >> /etc/sysctl.d/kubernetes.conf
-echo net.ipv4.ip_forward=1                 >> /etc/sysctl.d/kubernetes.conf
-sysctl --system
-
-systemctl enable kubelet
-
-#ADDR=$(ip -o -4 address show dev enp0s8 | awk '{split($4,a,"/");print a[1]}')
-echo "KUBELET_EXTRA_ARGS='--node-ip=${NODE_IP} --network-plugin=cni'" > /etc/default/kubelet
-
-sed -i s/.*${HOSTNAME}.*//g /etc/hosts
-echo "192.168.56.4 control-01" >> /etc/hosts
-echo "192.168.56.11 worker-01" >> /etc/hosts
-echo "192.168.56.12 worker-01" >> /etc/hosts
-
-cat << EOF >/etc/crictl.yaml
-runtime-endpoint: unix:///var/run/containerd/containerd.sock
-image-endpoint: unix:///var/run/containerd/containerd.sock
-timeout: 2
-debug: false
-pull-image-on-create: false
-EOF
-
-SCRIPT
-
-$init_master = <<-'SCRIPT'
-set -e
-
-kubeadm config images pull
-kubeadm init --kubernetes-version ${K8S_VERSION} --node-name ${HOSTNAME} --apiserver-cert-extra-sans=${NODE_IP} --token ppozut.y9dh2r1bdowfay3x --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/16 --apiserver-advertise-address 192.168.56.4
-
-mkdir ~/.kube
-cp /etc/kubernetes/admin.conf ~/.kube/config
-
-# Cilium networking plutin
-#curl -sL https://get.helm.sh/helm-v3.8.0-linux-amd64.tar.gz | tar -xz linux-amd64/helm
-#linux-amd64/helm repo add cilium https://helm.cilium.io/
-#linux-amd64/helm install cilium cilium/cilium --version 1.11.1 --namespace kube-system --wait
-
-# Flannel networking plugin
-#kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
-#kubectl create -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel-rbac.yml
-#kubectl wait pod --for condition=ready --all -n kube-system --timeout=300s
-
-# Calico
-kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
-
-# kubeadm token create --print-join-command
-# Fix wrong internal ip
-# /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-# --node-ip=<IP>
-SCRIPT
-
-$init_worker = <<-'SCRIPT'
-kubeadm join 192.168.56.4:6443 --token ppozut.y9dh2r1bdowfay3x --discovery-token-unsafe-skip-ca-verification
-SCRIPT
-
 
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
 
@@ -105,8 +31,21 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       end
 
-      cfg.vm.provision "shell", inline: $install_packages, env: {"K8S_VERSION" => "#{k8s_version}", "HOSTNAME" => "#{hostname}", "NODE_IP" => "#{info[:ip]}"}
-      cfg.vm.provision "shell", inline: $init_master, env: {"K8S_VERSION" => "#{k8s_version}", "HOSTNAME" => "#{hostname}", "NODE_IP" => "#{info[:ip]}"}
+      cfg.vm.provision "shell",
+        path: "scripts/common.sh",
+        env: {
+          "K8S_VERSION" => "#{k8s_version}",
+          "HOSTNAME" => "#{hostname}",
+          "NODE_IP" => "#{info[:ip]}"
+        }
+
+      cfg.vm.provision "shell",
+      path: "scripts/init-master.sh",
+      env: {
+        "K8S_VERSION" => "#{k8s_version}",
+        "HOSTNAME" => "#{hostname}",
+        "NODE_IP" => "#{info[:ip]}"
+      }
 
     end
 
@@ -126,8 +65,22 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vb.customize ["modifyvm", :id, "--natdnshostresolver1", "on"]
       end
 
-      cfg.vm.provision "shell", inline: $install_packages, env: {"K8S_VERSION" => "#{k8s_version}", "HOSTNAME" => "#{hostname}", "NODE_IP" => "#{info[:ip]}"}
-      cfg.vm.provision "shell", inline: $init_worker, env: {"K8S_VERSION" => "#{k8s_version}", "HOSTNAME" => "#{hostname}", "NODE_IP" => "#{info[:ip]}"}
+      cfg.vm.provision "shell",
+      path: "scripts/common.sh",
+      env: {
+        "K8S_VERSION" => "#{k8s_version}",
+        "HOSTNAME" => "#{hostname}",
+        "NODE_IP" => "#{info[:ip]}"
+      }
+
+      cfg.vm.provision "shell",
+      path: "scripts/init-worker.sh",
+      env: {
+        "K8S_VERSION" => "#{k8s_version}",
+        "HOSTNAME" => "#{hostname}",
+        "NODE_IP" => "#{info[:ip]}",
+        "MASTER_IP" => "192.168.56.4"
+      }
 
     end
 

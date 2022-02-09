@@ -29,3 +29,5 @@ minikube ssh -n minikube-m02
 
 - https://www.katacoda.com/djkormo
 - https://github.com/alijahnas/CKA-practice-exercises
+- https://github.com/scriptcamp/vagrant-kubeadm-kubernetes
+- https://devopscube.com/kubernetes-cluster-vagrant/

@@ -29,9 +29,11 @@ systemctl enable kubelet
 echo "KUBELET_EXTRA_ARGS='--node-ip=${NODE_IP} --network-plugin=cni'" > /etc/default/kubelet
 
 sed -i s/.*${HOSTNAME}.*//g /etc/hosts
-echo "192.168.56.4 control-01" >> /etc/hosts
-echo "192.168.56.11 worker-01" >> /etc/hosts
-echo "192.168.56.12 worker-01" >> /etc/hosts
+cat << EOF >> /etc/hosts
+192.168.56.4 control-01
+192.168.56.11 worker-01
+192.168.56.12 worker-02
+EOF
 
 cat << EOF >/etc/crictl.yaml
 runtime-endpoint: unix:///var/run/containerd/containerd.sock
@@ -39,3 +41,4 @@ image-endpoint: unix:///var/run/containerd/containerd.sock
 timeout: 2
 debug: false
 pull-image-on-create: false
+EOF

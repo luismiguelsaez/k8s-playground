@@ -21,7 +21,7 @@ EOF
 # Install tools
 
 ## etcdctl
-curl -sL https://github.com/etcd-io/etcd/releases/download/v3.5.2/etcd-v3.5.2-linux-arm64.tar.gz | tar --transform 's/^etcd-.*linux-arm64//' -xzvf - etcd-v3.5.2-linux-arm64/etcdctl -C /tmp/
+curl -sL https://github.com/etcd-io/etcd/releases/download/v3.5.2/etcd-v3.5.2-linux-amd64.tar.gz| tar --transform 's/^etcd-.*linux-arm64//' -xzvf - etcd-v3.5.2-linux-arm64/etcdctl -C /tmp/
 mv ./etcdctl /usr/local/bin/
 chmod +x /usr/local/bin/etcdctl
 

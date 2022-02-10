@@ -36,7 +36,7 @@ chmod +x /usr/local/bin/etcdctl
 #kubectl wait pod --for condition=ready --all -n kube-system --timeout=300s
 
 # Calico
-kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+su - vagrant "kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml"
 
 # kubeadm token create --print-join-command
 # Fix wrong internal ip

@@ -38,7 +38,8 @@ pull-image-on-create: false
 EOF
 
 # Configure containerd
-#mkdir /etc/containerd
+mkdir /etc/containerd
+containerd config default > /etc/containerd/config.toml
 #containerd config default | sed 's/\(SystemdCgroup = \).*/\1true/g' > /etc/containerd/config.toml
 
 # Install packages

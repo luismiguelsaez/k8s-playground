@@ -37,11 +37,6 @@ debug: false
 pull-image-on-create: false
 EOF
 
-# Configure containerd
-mkdir /etc/containerd
-containerd config default > /etc/containerd/config.toml
-#containerd config default | sed 's/\(SystemdCgroup = \).*/\1true/g' > /etc/containerd/config.toml
-
 # Install packages
 apt-get update -y
 apt-get install -y apt-transport-https ca-certificates curl
@@ -52,6 +47,10 @@ apt-get update -y
 apt-get install -y --allow-change-held-packages containerd kubelet=${K8S_VERSION}-00 kubeadm=${K8S_VERSION}-00 kubectl=${K8S_VERSION}-00
 apt-mark hold kubelet kubeadm kubectl
 
+# Configure containerd
+mkdir /etc/containerd
+containerd config default > /etc/containerd/config.toml
+#containerd config default | sed 's/\(SystemdCgroup = \).*/\1true/g' > /etc/containerd/config.toml
 
 systemctl enable kubelet
 

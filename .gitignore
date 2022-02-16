@@ -9,3 +9,4 @@
 *.box
 
 # End of https://www.toptal.com/developers/gitignore/api/vagrant
+cluster/vagrant/kubeadm.conf

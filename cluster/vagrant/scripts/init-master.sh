@@ -11,6 +11,9 @@ su - vagrant -c "mkdir ~/.kube"
 cp /etc/kubernetes/admin.conf /home/vagrant/.kube/config
 chown -R $(id -u vagrant).$(id -u vagrant) /home/vagrant/.kube/config
 
+# Copy config file to shared folder
+cp /etc/kubernetes/admin.conf /vagrant/kubeadm.conf
+
 cat << EOF >> /home/vagrant/.bashrc
 # kubectl command setup
 alias k="kubectl"

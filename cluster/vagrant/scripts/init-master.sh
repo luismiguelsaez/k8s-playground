@@ -52,7 +52,10 @@ su - vagrant -c "kubectl apply -f https://docs.projectcalico.org/manifests/calic
 su - vagrant -c "kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml"
 su - vagrant -c "kubectl patch deploy -n kube-system metrics-server --type=json --patch='[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/args\",\"value\":[\"--cert-dir=/tmp\",\"--secure-port=4443\",\"--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname\",\"--kubelet-use-node-status-port\",\"--metric-resolution=15s\",\"--kubelet-insecure-tls\"]}]'"
 
-# kubeadm token create --print-join-command
-# Fix wrong internal ip
-# /etc/systemd/system/kubelet.service.d/10-kubeadm.conf
-# --node-ip=<IP>
+# Install ArgoCD
+
+export ARGO_PASS="admin"
+export ARGO_PASS_ENC="$(htpasswd -nbBC 10 "" ${ARGO_PASS} | tr -d ':\n' | sed 's/$2y/$2a/')"
+helm repo add argo https://argoproj.github.io/argo-helm
+k create ns argocd
+helm install argocd argo/argo-cd -n argocd --create-namespace --set-string configs.secret.argocdServerAdminPassword="${ARGO_PASS_ENC}"

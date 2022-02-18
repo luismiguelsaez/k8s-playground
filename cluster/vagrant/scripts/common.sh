@@ -39,7 +39,7 @@ EOF
 
 # Install packages
 apt-get update -y
-apt-get install -y apt-transport-https ca-certificates curl
+apt-get install -y apt-transport-https ca-certificates curl htpasswd
 
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
 apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"

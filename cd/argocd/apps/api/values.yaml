@@ -1,0 +1,43 @@
+
+replicaCount: 2
+
+image:
+  repository: luismiguelsaez/health
+  pullPolicy: IfNotPresent
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 80
+
+ingress:
+  enabled: true
+  tls:
+    enabled: true
+    host: test.io
+  className: ""
+  annotations:
+    kubernetes.io/ingress.class: nginx
+  hosts:
+    - host: test.io
+      paths:
+        - path: /health
+          pathType: ImplementationSpecific
+
+resources: {}
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}

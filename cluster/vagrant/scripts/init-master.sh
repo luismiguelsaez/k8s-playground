@@ -66,4 +66,5 @@ EOF
 
 chmod +x /home/vagrant/install-argocd.sh
 su - vagrant -c /home/vagrant/install-argocd.sh
+su - vagrant -c "kubectl expose svc argocd-server --type=NodePort --target-port 8080 --name argocd-server-np -n argocd"
 

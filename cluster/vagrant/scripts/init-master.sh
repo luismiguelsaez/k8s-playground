@@ -52,6 +52,11 @@ su - vagrant -c "kubectl apply -f https://docs.projectcalico.org/manifests/calic
 su - vagrant -c "kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml"
 su - vagrant -c "kubectl patch deploy -n kube-system metrics-server --type=json --patch='[{\"op\":\"replace\",\"path\":\"/spec/template/spec/containers/0/args\",\"value\":[\"--cert-dir=/tmp\",\"--secure-port=4443\",\"--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname\",\"--kubelet-use-node-status-port\",\"--metric-resolution=15s\",\"--kubelet-insecure-tls\"]}]'"
 
+# Install Nginx ingress controller
+
+su - vagrant -c "helm repo add nginx-ingress https://helm.nginx.com/stable"
+su - vagrant -c "helm install nginx-ingress nginx-ingress/nginx-ingress --version 0.12.1 --create-namespace -n nginx"
+
 # Install ArgoCD
 
 export ARGO_PASS="admin"

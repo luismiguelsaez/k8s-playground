@@ -55,8 +55,15 @@ su - vagrant -c "kubectl patch deploy -n kube-system metrics-server --type=json 
 # Install ArgoCD
 
 export ARGO_PASS="admin"
-export ARGO_PASS_ENC="$(htpasswd -nbBC 10 "" ${ARGO_PASS} | tr -d ':\n' | sed 's/$2y/$2a/')"
+ARGO_PASS_ENC="$(htpasswd -nbBC 10 "" ${ARGO_PASS} | tr -d ':\n' | sed 's/$2y/$2a/')"
+export ARGO_PASS_ENC=$(echo ${ARGO_PASS_ENC} | sed 's/\$/\\$/g')
+
+cat << EOF > /home/vagrant/install-argocd.sh
 helm repo add argo https://argoproj.github.io/argo-helm
 kubectl create ns argocd
 helm install argocd argo/argo-cd -n argocd --create-namespace --set-string configs.secret.argocdServerAdminPassword="${ARGO_PASS_ENC}"
+EOF
+
+chmod +x /home/vagrant/install-argocd.sh
+su - vagrant -c /home/vagrant/install-argocd.sh
 

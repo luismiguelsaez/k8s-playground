@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: api
+  namespace: argocd
+  finalizers:
+  - resources-finalizer.argocd.argoproj.io
+spec:
+  revisionHistoryLimit: 5
+  syncPolicy:
+    automated:
+      allowEmpty: true
+      prune: true
+  destination:
+    namespace: apps
+    server: https://kubernetes.default.svc
+  project: default
+  source:
+    path: cd/argocd/apps/api
+    repoURL: https://github.com/luismiguelsaez/k8s-playground.git
+    targetRevision: master

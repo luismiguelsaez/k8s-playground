@@ -1,0 +1,57 @@
+server:
+  configEnabled: true
+  config:
+    repositories: |
+      - type: git
+        url: https://github.com/luismiguelsaez/k8s-playground.git
+  additionalProjects: 
+    - name: argocd
+      namespace: argocd
+      additionalLabels: {}
+      additionalAnnotations: {}
+      description: Argocd Project
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: argocd
+        server: https://kubernetes.default.svc
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      orphanedResources:
+        warn: false
+  additionalApplications:
+    - name: argocd-projects
+      namespace: argocd
+      project: argocd
+      destination:
+        namespace: argocd
+        server: https://kubernetes.default.svc
+      source:
+        repoURL: https://github.com/luismiguelsaez/k8s-playground.git
+        targetRevision: HEAD
+        path: cd/argocd/argocd-projects
+        directory:
+          recurse: true
+          jsonnet: {}
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+    - name: argocd-apps
+      namespace: argocd
+      project: argocd
+      destination:
+        namespace: argocd
+        server: https://kubernetes.default.svc
+      source:
+        repoURL: https://github.com/luismiguelsaez/k8s-playground.git
+        targetRevision: HEAD
+        path: cd/argocd/argocd-apps
+        directory:
+          recurse: true
+          jsonnet: {}
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true

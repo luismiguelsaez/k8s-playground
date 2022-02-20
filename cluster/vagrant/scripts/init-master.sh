@@ -67,6 +67,7 @@ cat << EOF > /home/vagrant/install-argocd.sh
 helm repo add argo https://argoproj.github.io/argo-helm
 kubectl create ns argocd
 helm install argocd argo/argo-cd -n argocd --create-namespace --set-string configs.secret.argocdServerAdminPassword="${ARGO_PASS_ENC}"
+#helm install argocd argo/argo-cd -n argocd --create-namespace --set-string configs.secret.argocdServerAdminPassword="${ARGO_PASS_ENC}" --values values-override.yaml
 EOF
 
 chmod +x /home/vagrant/install-argocd.sh

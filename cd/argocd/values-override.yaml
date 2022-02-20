@@ -1,4 +1,25 @@
 server:
+  configEnabled: true
+  config:
+    repositories: |
+      - type: git
+        url: https://github.com/luismiguelsaez/k8s-playground.git
+  additionalProjects: 
+    - name: argocd
+      namespace: argocd
+      additionalLabels: {}
+      additionalAnnotations: {}
+      description: Argocd Project
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: argocd
+        server: https://kubernetes.default.svc
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      orphanedResources:
+        warn: false
   additionalApplications:
     - name: argocd-projects
       namespace: argocd

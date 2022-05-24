@@ -1,8 +1,16 @@
 
+
+## Review `ClusterConfig` schema
+
+```bash
+eksctl utils schema
+```
+
 ## Create a cluster from some [example](https://github.com/weaveworks/eksctl/blob/main/examples)
 
 ```bash
-eksctl create cluster --profile lokalise-admin-dev --config-file two-node-groups.yaml
+eksctl create cluster --profile lokalise-admin-dev --config-file complete-cluster.yaml
+eksctl utils associate-iam-oidc-provider --cluster=test --approve
 ```
 
 ## Ingress configuration

@@ -6,13 +6,83 @@ metadata:
   name: cluster-1
   region: eu-central-1
 
+availabilityZones: ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
+
+vpc:
+  cidr: 172.24.0.0/16
+  autoAllocateIPv6: false
+  clusterEndpoints:
+    publicAccess: true
+    privateAccess: true
+
 nodeGroups:
-  - name: ng1-private
-    instanceType: t3a.large
-    instanceName: custom-node-name
+  - name: ng-frontend
+    instanceType: t3a.xlarge
+    minSize: 2
+    maxSize: 5
     desiredCapacity: 2
+    amiFamily: Bottlerocket
     privateNetworking: true
-  - name: ng2-private
+    volumeSize: 100
+    volumeType: gp2
+    volumeEncrypted: true
+    disableIMDSv1: true
+    labels:
+      nodegroup-type: frontend
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+  - name: ng-backend
     instanceType: t3a.medium
+    minSize: 2
+    maxSize: 5
     desiredCapacity: 2
+    amiFamily: AmazonLinux2
     privateNetworking: true
+    disableIMDSv1: true
+    labels:
+      nodegroup-type: backend
+    iam:
+      withAddonPolicies:
+        autoScaler: true
+  - name: ng-batch
+    minSize: 2
+    maxSize: 5
+    desiredCapacity: 2
+    amiFamily: AmazonLinux2
+    privateNetworking: true
+    disableIMDSv1: false
+    labels:
+      nodegroup-type: batch
+    instancesDistribution:
+      maxPrice: 0.017
+      instanceTypes: ["t3.small", "t3.medium"]
+      onDemandBaseCapacity: 0
+      onDemandPercentageAboveBaseCapacity: 50
+      spotInstancePools: 2
+
+iam:
+  withOIDC: true
+  serviceAccounts:
+  - metadata:
+      name: s3-reader
+      namespace: backend-apps
+      labels: {aws-usage: "application"}
+    attachPolicyARNs:
+    - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+  - metadata:
+      name: autoscaler-service
+      namespace: kube-system
+    attachPolicy:
+      Version: "2012-10-17"
+      Statement:
+      - Effect: Allow
+        Action:
+        - "autoscaling:DescribeAutoScalingGroups"
+        - "autoscaling:DescribeAutoScalingInstances"
+        - "autoscaling:DescribeLaunchConfigurations"
+        - "autoscaling:DescribeTags"
+        - "autoscaling:SetDesiredCapacity"
+        - "autoscaling:TerminateInstanceInAutoScalingGroup"
+        - "ec2:DescribeLaunchTemplateVersions"
+        Resource: '*'

@@ -4,3 +4,18 @@
 ```bash
 eksctl create cluster --profile lokalise-admin-dev --config-file two-node-groups.yaml
 ```
+
+## Ingress configuration
+
+### AWS [ingress controller](https://aws.amazon.com/blogs/opensource/kubernetes-ingress-aws-alb-ingress-controller/)
+```bash
+kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/rbac-role.yaml
+```
+
+### Nginx
+
+## Delete cluster
+
+```bash
+eksctl delete cluster --profile lokalise-admin-dev --config-file two-node-groups.yaml
+```

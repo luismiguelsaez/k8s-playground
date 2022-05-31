@@ -3,8 +3,8 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: test
-  version: "1.22.6"
+  name: test-complete-multi-ng
+  version: "1.22"
   region: eu-central-1
 
 availabilityZones: ["eu-central-1a", "eu-central-1b", "eu-central-1c"]

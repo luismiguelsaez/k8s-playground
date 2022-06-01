@@ -58,12 +58,13 @@ eksctl create cluster --config-file cloud/aws/eksctl/single-ng-cluster.yaml
   ```bash
   helm install argocd argo/argo-cd -n argocd --values cloud/aws/charts/argo-cd/values.yaml --create-namespace
   ```
+- Test locally
+  ```bash
+  k port-forward svc/argocd-eks-test 8080:80 -n argocd
+  ```
 
 ## Delete cluster
 
-```bash
-aws iam delete-policy --policy-arn arn:aws:iam::484308071187:policy/AWSLoadBalancerControllerIAMPolicy
-```
 ```bash
 eksctl delete cluster --config-file two-node-groups.yaml
 ```

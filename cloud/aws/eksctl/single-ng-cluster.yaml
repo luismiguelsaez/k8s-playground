@@ -13,11 +13,11 @@ vpc:
     privateAccess: true
   id: vpc-0d6aa2304efd1cae4
   subnets:
-    public:
-      public-one:
-        id: subnet-05e69719d6fa2cb94
-      public-two:
-        id: subnet-0d86cd2f70222c1b2
+    #public:
+    #  public-one:
+    #    id: subnet-05e69719d6fa2cb94
+    #  public-two:
+    #    id: subnet-0d86cd2f70222c1b2
     private:
       private-one:
         id: subnet-0f2ea9bb43de20750

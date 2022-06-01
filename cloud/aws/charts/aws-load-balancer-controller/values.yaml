@@ -1,0 +1,10 @@
+---
+
+clusterName: single-ng-lb-controller
+serviceAccount:
+  create: false
+  annotations: {}
+  name: aws-load-balancer-controller
+
+region: eu-central-1
+vpcId: vpc-0d6aa2304efd1cae4

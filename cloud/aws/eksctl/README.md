@@ -14,16 +14,10 @@ export AWS_PROFILE=""
 ## Create a cluster from some [example](https://github.com/weaveworks/eksctl/blob/main/examples)
 
 ```bash
-eksctl create cluster --config-file complete-cluster.yaml
-eksctl utils associate-iam-oidc-provider --cluster=test --approve
+eksctl create cluster --config-file cloud/aws/eksctl/single-ng-cluster.yaml
 ```
 
 ## Ingress configuration
-
-### AWS [ingress controller](https://aws.amazon.com/blogs/opensource/kubernetes-ingress-aws-alb-ingress-controller/)
-```bash
-kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingress-controller/v1.1.4/docs/examples/rbac-role.yaml
-```
 
 ### AWS [load balancer controller](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html)
 
@@ -31,28 +25,6 @@ kubectl apply -f https://raw.githubusercontent.com/kubernetes-sigs/aws-alb-ingre
 - eksctl docs: https://www.eksworkshop.com/beginner/180_fargate/prerequisites-for-alb/
 - Annotations: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.4/
 
-- Add OIDC provider
-  ```bash
-  eksctl utils associate-iam-oidc-provider --region eu-central-1 --cluster test-single-ng --approve
-  ```
-- Create IAM policy
-  ```bash
-  curl -LO https://raw.githubusercontent.com/kubernetes-sigs/aws-load-balancer-controller/v2.4.2/docs/install/iam_policy.json
-  aws iam create-policy --policy-name AWSLoadBalancerControllerIAMPolicy --policy-document file://iam_policy.json
-  rm iam_policy.json
-  ```
-- Create IAM role and SA
-  ```bash
-  eksctl create iamserviceaccount \
-    \
-    --cluster=test-single-ng \
-    --namespace=kube-system \
-    --name=aws-load-balancer-controller \
-    --attach-policy-arn=arn:aws:iam::484308071187:policy/AWSLoadBalancerControllerIAMPolicy \
-    --override-existing-serviceaccounts \
-    --region eu-central-1 \
-    --approve
-  ```
 - Install controller
   ```bash
   helm repo add eks https://aws.github.io/eks-charts

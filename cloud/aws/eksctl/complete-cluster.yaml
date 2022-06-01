@@ -15,6 +15,17 @@ vpc:
   clusterEndpoints:
     publicAccess: true
     privateAccess: true
+  subnets:
+    public:
+      public-one:
+        cidr: 172.24.1.0/24
+      public-two:
+        cidr: 172.24.3.0/24
+    private:
+      private-one:
+        cidr: 172.24.2.0/24
+      private-two:
+        cidr: 172.24.4.0/24
 
 nodeGroups:
   - name: ng-frontend

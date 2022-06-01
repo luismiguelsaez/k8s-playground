@@ -3,11 +3,23 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: test-single-ng
+  name: single-ng
   version: "1.22"
   region: eu-central-1
 
-availabilityZones: ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
+vpc:
+  id: vpc-0d6aa2304efd1cae4
+  subnets:
+    public:
+      public-one:
+        id: subnet-05e69719d6fa2cb94
+      public-two:
+        id: subnet-0d86cd2f70222c1b2
+    private:
+      private-one:
+        id: subnet-0f2ea9bb43de20750
+      private-two:
+        id: subnet-03799dc81d15f5995
 
 nodeGroups:
   - name: ng-frontend

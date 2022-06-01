@@ -28,7 +28,7 @@ eksctl create cluster --config-file cloud/aws/eksctl/single-ng-cluster.yaml
 - Install controller
   ```bash
   helm repo add eks https://aws.github.io/eks-charts
-  helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=test-single-ng --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller
+  helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=single-ng --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller --set region=eu-central-1 --set vpcId=vpc-0d6aa2304efd1cae4
   ```
 
 ### Nginx

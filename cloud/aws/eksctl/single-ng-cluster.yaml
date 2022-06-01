@@ -3,13 +3,13 @@ apiVersion: eksctl.io/v1alpha5
 kind: ClusterConfig
 
 metadata:
-  name: single-ng
+  name: single-ng-lb-controller
   version: "1.22"
   region: eu-central-1
 
 vpc:
   clusterEndpoints:
-    publicAccess: false
+    publicAccess: true
     privateAccess: true
   id: vpc-0d6aa2304efd1cae4
   subnets:
@@ -25,7 +25,7 @@ vpc:
         id: subnet-03799dc81d15f5995
 
 nodeGroups:
-  - name: ng-frontend
+  - name: default
     instanceType: t3a.large
     minSize: 2
     maxSize: 5
@@ -43,7 +43,7 @@ iam:
   withOIDC: true
   serviceAccounts:
   - metadata:
-      name: alb-load-balancer-controller
+      name: aws-load-balancer-controller
       namespace: kube-system
     attachPolicy:
       Version: "2012-10-17"

@@ -83,7 +83,7 @@ iam:
     attachPolicyARNs:
     - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
   - metadata:
-      name: alb-load-balancer-controller
+      name: aws-load-balancer-controller
       namespace: kube-system
     attachPolicy:
       Version: "2012-10-17"

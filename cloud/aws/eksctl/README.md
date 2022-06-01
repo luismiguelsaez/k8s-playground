@@ -66,5 +66,5 @@ eksctl create cluster --config-file cloud/aws/eksctl/single-ng-cluster.yaml
 ## Delete cluster
 
 ```bash
-eksctl delete cluster --config-file two-node-groups.yaml
+eksctl delete cluster --region=eu-central-1 --name=single-ng-lb-controller 
 ```

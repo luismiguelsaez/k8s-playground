@@ -23,7 +23,9 @@ eksctl create cluster --config-file cloud/aws/eksctl/single-ng-cluster.yaml
 
 - Github repo: https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/deploy/installation.md
 - eksctl docs: https://www.eksworkshop.com/beginner/180_fargate/prerequisites-for-alb/
-- Annotations: https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.4/
+- Annotations ( https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.4/ )
+  - Service: https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/guide/service/annotations.md
+  - Ingress: https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/guide/ingress/annotations.md
 
 - Install controller
   ```bash

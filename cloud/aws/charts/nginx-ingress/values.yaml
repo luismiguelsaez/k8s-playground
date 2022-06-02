@@ -15,14 +15,11 @@ controller:
     type: LoadBalancer
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-type: external
+      service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
       service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
-      #service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
-      #service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-05e69719d6fa2cb94,subnet-0d86cd2f70222c1b2 # public
-      service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-0f2ea9bb43de20750,subnet-03799dc81d15f5995 # private
-      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: http
-      #service.beta.kubernetes.io/aws-load-balancer-target-node-labels: label1=value1, label2=value
-      #service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
-      #service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: "3600"
+      service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-05e69719d6fa2cb94,subnet-0d86cd2f70222c1b2 # public
+      #service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-0f2ea9bb43de20750,subnet-03799dc81d15f5995 # private
+      service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
       #service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:acm:us-east-1:1234567:certificate/1234294-232-4f89-bca8
       #service.beta.kubernetes.io/aws-load-balancer-ssl-ports: https
   prometheus:

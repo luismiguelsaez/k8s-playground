@@ -58,7 +58,7 @@ eksctl create cluster --config-file cloud/aws/eksctl/single-ng-cluster.yaml
   ```
 - Install
   ```bash
-  helm install argocd argo/argo-cd -n argocd --values cloud/aws/charts/argo-cd/values.yaml --create-namespace
+  helm install argocd argo/argo-cd -n argocd --values cloud/aws/charts/argo-cd/values.yaml --create-namespace --version 3.33.6
   ```
 - Test locally
   ```bash

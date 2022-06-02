@@ -15,7 +15,7 @@ controller:
     type: LoadBalancer
     annotations:
       service.beta.kubernetes.io/aws-load-balancer-type: external
-      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: ip
+      service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
       #service.beta.kubernetes.io/aws-load-balancer-proxy-protocol: '*'
       #service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-05e69719d6fa2cb94,subnet-0d86cd2f70222c1b2 # public
       service.beta.kubernetes.io/aws-load-balancer-subnets: subnet-0f2ea9bb43de20750,subnet-03799dc81d15f5995 # private

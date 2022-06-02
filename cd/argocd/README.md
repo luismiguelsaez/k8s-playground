@@ -1,6 +1,8 @@
 
 # Server bootstrapping
 
+- https://rtfm.co.ua/en/argocd-declarative-projects-applications-and-argocd-deploy-from-jenkins/#Projects
+
 ## Create cluster
 ```
 kind create cluster --name argo-test --config kind-cluster-4no-ingress.yml

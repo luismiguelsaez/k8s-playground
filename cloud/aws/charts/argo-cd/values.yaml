@@ -11,27 +11,117 @@ server:
       kubernetes.io/ingress.class: "nginx"
     labels: {}
     hosts:
-      - argocd.dev.lokalise.cloud
+      - argocd.dev.*.cloud
     paths:
       - /
     pathType: Prefix
-    extraPaths:
-      []
-      # - path: /*
-      #   backend:
-      #     serviceName: ssl-redirect
-      #     servicePort: use-annotation
-      ## for Kubernetes >=1.19 (when "networking.k8s.io/v1" is used)
-      # - path: /*
-      #   pathType: Prefix
-      #   backend:
-      #     service:
-      #       name: ssl-redirect
-      #       port:
-      #         name: use-annotation
-    tls:
-      []
-      # - secretName: argocd-tls-certificate
-      #   hosts:
-      #     - argocd.example.com
+    extraPaths: []
+    tls: []
     https: false
+  configEnabled: true
+  config:
+    secret:
+      createSecret: true
+      annotations: {}
+      argocdServerAdminPassword: "$2a$10$zoUgs0Cox8AZsSgba3xsq.RVQoaZOFIJ/LL2rZcCs3uSrkxXE7QaG"
+    repositories: |
+      - type: git
+        name: elastic
+        url: https://github.com/elastic/helm-charts
+      - type: helm
+        name: prometheus-community
+        url: https://prometheus-community.github.io/helm-charts
+      - type: helm
+        name: bitnami
+        url: https://charts.bitnami.com/bitnami
+      - type: helm
+        name: metrics-server
+        url: https://kubernetes-sigs.github.io/metrics-server
+  additionalProjects:
+  # Doc: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/project.yaml
+    - name: platform-mon # Name for the AppProject object
+      namespace: argocd  # Namespace where to create the AppProject object
+      additionalLabels: {}
+      additionalAnnotations: {}
+      description: System workloads
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: monitoring
+        server: https://kubernetes.default.svc
+      - namespace: kube-system
+        server: https://kubernetes.default.svc
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      orphanedResources:
+        warn: false
+  additionalApplications:
+  # Doc: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/application.yaml
+    - name: prometheus  # Name for the Application object
+      namespace: argocd # Namespace where to create the Application object
+      project: platform-mon
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: monitoring
+      source:
+        repoURL: https://prometheus-community.github.io/helm-charts
+        targetRevision: "35.5.1"
+        chart: kube-prometheus-stack
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          selfHeal: true
+          prune: true
+    - name: metrics-server # Name for the Application object
+      namespace: argocd    # Namespace where to create the Application object
+      project: platform-mon
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: kube-system
+      source:
+        repoURL: https://kubernetes-sigs.github.io/metrics-server
+        targetRevision: "3.8.2"
+        chart: metrics-server
+        helm:
+          parameters: []
+        #  - name: apiService.insecureSkipTLSVerify
+        #    value: "false"
+        #  - name: args
+        #    value: "['--kubelet-insecure-tls']"
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          selfHeal: true
+          prune: true
+    - name: filebeat
+      namespace: argocd
+      #finalizers:
+      #  - resources-finalizer.argocd.argoproj.io
+      project: platform-mon
+      destination:
+        server: 'https://kubernetes.default.svc'
+        namespace: monitoring
+      source:
+        repoURL: 'https://github.com/elastic/helm-charts'
+        path: filebeat
+        targetRevision: HEAD
+        #helm:
+        #  parameters:
+        #  - name: serviceType
+        #    value: LoadBalancer
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+          - Validate=true
+      retry:
+        limit: 5
+        backoff:
+          duration: 5s
+          factor: 2
+          maxDuration: 3m

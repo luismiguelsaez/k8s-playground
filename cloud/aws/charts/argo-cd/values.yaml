@@ -20,10 +20,10 @@ server:
     https: false
   configEnabled: true
   config:
-    secret:
-      createSecret: true
-      annotations: {}
-      argocdServerAdminPassword: "$2a$10$zoUgs0Cox8AZsSgba3xsq.RVQoaZOFIJ/LL2rZcCs3uSrkxXE7QaG"
+    #secret:
+    #  createSecret: true
+    #  annotations: {}
+    #  argocdServerAdminPassword: "$2a$10$zoUgs0Cox8AZsSgba3xsq.RVQoaZOFIJ/LL2rZcCs3uSrkxXE7QaG"
     repositories: |
       - type: git
         name: elastic
@@ -31,6 +31,9 @@ server:
       - type: helm
         name: prometheus-community
         url: https://prometheus-community.github.io/helm-charts
+      - type: helm
+        name: grafana
+        url: https://github.com/grafana/helm-charts
       - type: helm
         name: bitnami
         url: https://charts.bitnami.com/bitnami
@@ -71,6 +74,22 @@ server:
         repoURL: https://prometheus-community.github.io/helm-charts
         targetRevision: "35.5.1"
         chart: kube-prometheus-stack
+      syncPolicy:
+        syncOptions:
+          - CreateNamespace=true
+        automated:
+          selfHeal: true
+          prune: true
+    - name: grafana     # Name for the Application object
+      namespace: argocd # Namespace where to create the Application object
+      project: platform-mon
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: monitoring
+      source:
+        repoURL: https://github.com/grafana/helm-charts
+        targetRevision: "6.29.5"
+        chart: grafana
       syncPolicy:
         syncOptions:
           - CreateNamespace=true

@@ -90,6 +90,25 @@ server:
         repoURL: https://github.com/grafana/helm-charts
         targetRevision: "6.29.5"
         chart: grafana
+        helm:
+          parameters:
+          - name: datasources.datasources.yaml
+            value: |
+              apiVersion: 1
+              datasources:
+              - name: Prometheus
+                type: prometheus
+                url: http://prometheus-prometheus-server
+                access: proxy
+                isDefault: true
+              - name: CloudWatch
+                type: cloudwatch
+                access: proxy
+                uid: cloudwatch
+                editable: false
+                jsonData:
+                  authType: default
+                  defaultRegion: us-east-1
       syncPolicy:
         syncOptions:
           - CreateNamespace=true

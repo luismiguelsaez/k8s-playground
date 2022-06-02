@@ -93,22 +93,17 @@ server:
         helm:
           parameters:
           - name: datasources.datasources.yaml
-            value: |
+            value: |-
               apiVersion: 1
               datasources:
               - name: Prometheus
                 type: prometheus
-                url: http://prometheus-prometheus-server
+                uid: prometheus
+                url: http://prometheus-kube-prometheus-prometheus.monitoring.svc.cluster.local:9090
                 access: proxy
                 isDefault: true
-              - name: CloudWatch
-                type: cloudwatch
-                access: proxy
-                uid: cloudwatch
-                editable: false
                 jsonData:
-                  authType: default
-                  defaultRegion: us-east-1
+                  timeInterval: 30s
       syncPolicy:
         syncOptions:
           - CreateNamespace=true

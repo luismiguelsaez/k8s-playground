@@ -28,6 +28,9 @@ server:
       - type: git
         name: elastic
         url: https://github.com/elastic/helm-charts
+      - type: git
+        name: fluent
+        url: https://github.com/fluent/helm-charts
       - type: helm
         name: prometheus-community
         url: https://prometheus-community.github.io/helm-charts
@@ -132,7 +135,7 @@ server:
         automated:
           selfHeal: true
           prune: true
-    - name: filebeat
+    - name: fluentbit
       namespace: argocd
       #finalizers:
       #  - resources-finalizer.argocd.argoproj.io
@@ -141,9 +144,9 @@ server:
         server: 'https://kubernetes.default.svc'
         namespace: monitoring
       source:
-        repoURL: 'https://github.com/elastic/helm-charts'
-        path: filebeat
-        targetRevision: HEAD
+        repoURL: 'https://github.com/fluent/helm-charts'
+        path: fluent-bit
+        targetRevision: "0.20.1"
         #helm:
         #  parameters:
         #  - name: serviceType

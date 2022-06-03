@@ -64,6 +64,13 @@ eksctl create cluster --config-file cloud/aws/eksctl/single-ng-cluster.yaml
   ```bash
   k port-forward svc/argocd-eks-test 8080:80 -n argocd
   ```
+- Add private repo
+  ```
+  argocd login http://<server> --insecure --username admin --password $(kubectl get secret argocd-initial-admin-secret -o jsonpath={.data.password} | base64 -d)
+
+  argocd repo add git@github.com:test/test.git --ssh-private-key-path ~/.ssh/id_rsa
+
+  ```
 
 ## Delete cluster
 

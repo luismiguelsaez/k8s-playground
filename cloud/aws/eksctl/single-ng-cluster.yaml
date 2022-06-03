@@ -11,7 +11,7 @@ vpc:
   clusterEndpoints:
     publicAccess: true
     privateAccess: true
-  id: vpc-0d6aa2304efd1cae4
+  id: vpc-047f2fc64d0ea743f
   subnets:
     #public:
     #  public-one:
@@ -20,9 +20,9 @@ vpc:
     #    id: subnet-0d86cd2f70222c1b2
     private:
       private-one:
-        id: subnet-0f2ea9bb43de20750
+        id: subnet-0807feb9dd4003eb4
       private-two:
-        id: subnet-03799dc81d15f5995
+        id: subnet-00609224e9ee6d483
 
 nodeGroups:
   - name: default

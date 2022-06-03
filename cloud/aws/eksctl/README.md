@@ -30,7 +30,7 @@ eksctl create cluster --config-file cloud/aws/eksctl/single-ng-cluster.yaml
 - Install controller
   ```bash
   helm repo add eks https://aws.github.io/eks-charts
-  helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=single-ng-lb-controller --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller --set region=eu-central-1 --set vpcId=vpc-0d6aa2304efd1cae4
+  helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=single-ng-lb-controller --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller --set region=eu-central-1 --set vpcId=vpc-047f2fc64d0ea743f
   ```
 
 ### Nginx
@@ -66,10 +66,9 @@ eksctl create cluster --config-file cloud/aws/eksctl/single-ng-cluster.yaml
   ```
 - Add private repo
   ```
-  argocd login http://<server> --insecure --username admin --password $(kubectl get secret argocd-initial-admin-secret -o jsonpath={.data.password} | base64 -d)
+  argocd login http://<server> --grpc-web --insecure --username admin --password $(kubectl get secret argocd-initial-admin-secret -o jsonpath={.data.password} | base64 -d)
 
-  argocd repo add git@github.com:test/test.git --ssh-private-key-path ~/.ssh/id_rsa
-
+  argocd repo add git@github.com:test/test.git --grpc-web --ssh-private-key-path ~/.ssh/id_rsa
   ```
 
 ## Delete cluster

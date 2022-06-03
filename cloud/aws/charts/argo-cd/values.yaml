@@ -1,5 +1,47 @@
 ---
 
+configs:
+  knownHostsAnnotations: {}
+  knownHosts:
+    data:
+      ssh_known_hosts: |
+        github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg
+  credentialTemplates: {}
+  #  ssh-creds:
+  #    url: git@github.com:companyName
+  #    sshPrivatekey: |
+  #      -----BEGIN OPENSSH PRIVATE KEY-----
+  #      ...
+  #      -----END OPENSSH PRIVATE KEY-----
+  repositories:
+    elastic:
+      type: git
+      name: elastic
+      url: https://github.com/elastic/helm-charts
+    fluent:
+      type: git
+      name: fluent
+      url: https://github.com/fluent/helm-charts
+    prometheus-community:
+      type: helm
+      name: prometheus-community
+      url: https://prometheus-community.github.io/helm-charts
+    grafana:
+      type: helm
+      name: grafana
+      url: https://github.com/grafana/helm-charts
+    bitnami:
+      type: helm
+      name: bitnami
+      url: https://charts.bitnami.com/bitnami
+    metrics-server:
+      type: helm
+      name: metrics-server
+      url: https://kubernetes-sigs.github.io/metrics-server
+  secret:
+    createSecret: false
+    githubSecret: ""
+    argocdServerAdminPassword: "$2a$10$zoUgs0Cox8AZsSgba3xsq.RVQoaZOFIJ/LL2rZcCs3uSrkxXE7QaG"
 server:
   name: eks-test
   extraArgs:
@@ -20,29 +62,8 @@ server:
     https: false
   configEnabled: true
   config:
-    #secret:
-    #  createSecret: true
-    #  annotations: {}
-    #  argocdServerAdminPassword: "$2a$10$zoUgs0Cox8AZsSgba3xsq.RVQoaZOFIJ/LL2rZcCs3uSrkxXE7QaG"
-    repositories: |
-      - type: git
-        name: elastic
-        url: https://github.com/elastic/helm-charts
-      - type: git
-        name: fluent
-        url: https://github.com/fluent/helm-charts
-      - type: helm
-        name: prometheus-community
-        url: https://prometheus-community.github.io/helm-charts
-      - type: helm
-        name: grafana
-        url: https://github.com/grafana/helm-charts
-      - type: helm
-        name: bitnami
-        url: https://charts.bitnami.com/bitnami
-      - type: helm
-        name: metrics-server
-        url: https://kubernetes-sigs.github.io/metrics-server
+    url: ""
+  configAnnotations: {}
   additionalProjects:
   # Doc: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/project.yaml
     - name: platform-mon # Name for the AppProject object
@@ -145,8 +166,8 @@ server:
         namespace: monitoring
       source:
         repoURL: 'https://github.com/fluent/helm-charts'
-        path: fluent-bit
-        targetRevision: "0.20.1"
+        path: charts/fluent-bit
+        targetRevision: "fluent-bit-0.20.1"
         #helm:
         #  parameters:
         #  - name: serviceType

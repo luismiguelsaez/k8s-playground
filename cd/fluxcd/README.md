@@ -34,3 +34,33 @@ flux install
 
   flux reconcile helmrelease nginx
   ```
+
+## Github setup
+
+- Docs
+  - Repo structure: https://fluxcd.io/docs/guides/repository-structure/
+  - Example structure: https://github.com/fluxcd/flux2-kustomize-helm-example
+
+- Create access token
+
+- Bootstrap repo ( https://github.com/luismiguelsaez/fluxcd-playground )
+
+  - Empty repository
+    ```bash
+    flux bootstrap github \
+      --owner=luismiguelsaez \
+      --repository=fluxcd-playground \
+      --path=clusters/minikube \
+      --personal
+    ```
+  - Existing repository
+    ```bash
+    flux bootstrap github \
+      --context=minikube \
+      --owner=luismiguelsaez \
+      --repository=fluxcd-playground \
+      --branch=main \
+      --personal \
+      --path=clusters/live \
+      --timeout=10m
+    ```

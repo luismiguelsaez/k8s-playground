@@ -1,0 +1,140 @@
+---
+
+# https://argo-cd.readthedocs.io/en/latest/operator-manual/declarative-setup/
+configs:
+  knownHostsAnnotations: {}
+  knownHosts:
+    data:
+      ssh_known_hosts: |
+        github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+        github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+        github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+  # https://github.com/argoproj/argo-cd/blob/master/docs/user-guide/private-repositories.md
+  credentialTemplates:
+    # https://vault.umbrellacorp.cloud/ui/vault/secrets/kv/show/external/github/users/admin
+    https-creds:
+      type: git
+      url: https://github.com/umbrellacorp
+      password: 4dm1nP4Ss
+      username: admin
+    # https://vault.umbrellacorp.cloud/ui/vault/secrets/kv/show/external/github/ssh-keys/admin
+    ssh-creds:
+      type: git
+      url: git@github.com:umbrellacorp
+      # Must be: ssh-keygen -t ecdsa -b 521 -f git-test
+      sshPrivatekey: |
+        -----BEGIN OPENSSH PRIVATE KEY-----
+        ....
+        -----END OPENSSH PRIVATE KEY-----
+  secret:
+    createSecret: true
+    # -- Shared secret for authenticating GitHub webhook events
+    #githubSecret: ""
+    # Generate: echo -n `htpasswd -nbBC 10 "" $ARGO_PWD | tr -d ':\n' | sed 's/$2y/$2a/'`
+    argocdServerAdminPassword: "$2a$10$zoUgs0Cox8AZsSgba3xsq.RVQoaZOFIJ/LL2rZcCs3uSrkxXE7QaG"
+  repositories:
+    # Create secret to be used for auth
+    #   k create secret generic argocd-git-ssh-umbrellacorp --from-file=sshPrivateKey=/home/leon/git-test -n argocd
+    messages:
+      type: git
+      name: messages
+      url: https://github.com/umbrellacorp/messages
+      #sshPrivateKeySecret:
+      #  name: argocd-git-ssh-umbrellacorp
+      #  key: sshPrivateKey
+    elastic:
+      type: git
+      name: elastic
+      url: https://github.com/elastic/helm-charts
+    fluent:
+      type: git
+      name: fluent
+      url: https://github.com/fluent/helm-charts
+    prometheus-community:
+      type: helm
+      name: prometheus-community
+      url: https://prometheus-community.github.io/helm-charts
+    grafana:
+      type: helm
+      name: grafana
+      url: https://grafana.github.io/helm-charts
+    bitnami:
+      type: helm
+      name: bitnami
+      url: https://charts.bitnami.com/bitnami
+    metrics-server:
+      type: helm
+      name: metrics-server
+      url: https://kubernetes-sigs.github.io/metrics-server
+
+server:
+  name: eks-test
+  extraArgs:
+    - --insecure
+  ingress:
+    enabled: false
+    annotations:
+      nginx.ingress.kubernetes.io/ssl-redirect: "false"
+      kubernetes.io/ingress.class: "nginx"
+    labels: {}
+    hosts:
+      - argocd.dev.umbrellacorp.cloud
+    paths:
+      - /
+    pathType: Prefix
+    extraPaths: []
+    tls: []
+    https: false
+  configEnabled: true
+  # https://github.com/argoproj/argo-cd/blob/master/docs/user-guide/projects.md
+  additionalProjects: 
+    - name: argocd
+      namespace: argocd
+      additionalLabels: {}
+      additionalAnnotations: {}
+      description: Argocd Project
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: argocd
+        server: https://kubernetes.default.svc
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      orphanedResources:
+        warn: false
+  additionalApplications:
+    - name: argocd-projects
+      namespace: argocd
+      project: argocd
+      destination:
+        namespace: argocd
+        server: https://kubernetes.default.svc
+      source:
+        repoURL: git@github.com:umbrellacorp/infra-argocd.git
+        targetRevision: main
+        path: projects
+        directory:
+          recurse: true
+          jsonnet: {}
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+    - name: argocd-apps
+      namespace: argocd
+      project: argocd
+      destination:
+        namespace: argocd
+        server: https://kubernetes.default.svc
+      source:
+        repoURL: git@github.com:umbrellacorp/infra-argocd.git
+        targetRevision: main
+        path: applications
+        directory:
+          recurse: true
+          jsonnet: {}
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true

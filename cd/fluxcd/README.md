@@ -64,3 +64,4 @@ flux install
       --path=clusters/live \
       --timeout=10m
     ```
+  - Terraform provider: https://registry.terraform.io/providers/fluxcd/flux/latest/docs/guides/github

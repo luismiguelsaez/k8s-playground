@@ -55,6 +55,8 @@ server:
   configEnabled: true
   config:
     url: ""
+    #kustomize.path.v3.5.1: /custom-tools/kustomize_3_5_1
+    #kustomize.path.v3.5.4: /custom-tools/kustomize_3_5_4
   configAnnotations: {}
   additionalProjects:
   # Doc: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/project.yaml
@@ -81,39 +83,13 @@ server:
       orphanedResources:
         warn: false
   additionalApplications:
-  # Doc: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/application.yaml
-    - name: projects-infra # Name for the Application object
-      namespace: argocd    # Namespace where to create the Application object
-      project: argocd
-      source:
-        repoURL: https://github.com/luismiguelsaez/argocd-playground
-        targetRevision: main
-        path: infra/projects
-        directory:
-          recurse: true
-      destination:
-        server: https://kubernetes.default.svc
-        namespace: argocd
-      syncPolicy:
-        automated:
-          selfHeal: true
-          prune: false
-          allowEmpty: false
-      retry:
-        limit: 5
-        backoff:
-          duration: 5s
-          factor: 2
-          maxDuration: 10m
-    - name: apps-infra  # Name for the Application object
+    - name: infra       # Name for the Application object
       namespace: argocd # Namespace where to create the Application object
       project: argocd
       source:
         repoURL: https://github.com/luismiguelsaez/argocd-playground
         targetRevision: main
-        path: infra/apps
-        directory:
-          recurse: true
+        path: infra
       destination:
         server: https://kubernetes.default.svc
         namespace: argocd
@@ -135,8 +111,6 @@ server:
         repoURL: https://github.com/luismiguelsaez/argocd-playground
         targetRevision: main
         path: services
-        directory:
-          recurse: true
       destination:
         server: https://kubernetes.default.svc
         namespace: argocd

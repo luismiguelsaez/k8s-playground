@@ -91,14 +91,13 @@ server:
         path: infra/projects
         directory:
           recurse: true
-          jsonnet: {}
       destination:
         server: https://kubernetes.default.svc
         namespace: argocd
       syncPolicy:
         automated:
           selfHeal: true
-          prune: true
+          prune: false
           allowEmpty: false
       retry:
         limit: 5
@@ -115,14 +114,36 @@ server:
         path: infra/apps
         directory:
           recurse: true
-        jsonnet: {}
       destination:
         server: https://kubernetes.default.svc
         namespace: argocd
       syncPolicy:
         automated:
           selfHeal: true
-          prune: true
+          prune: false
+          allowEmpty: false
+      retry:
+        limit: 5
+        backoff:
+          duration: 5s
+          factor: 2
+          maxDuration: 10m
+    - name: apps        # Name for the Application object
+      namespace: argocd # Namespace where to create the Application object
+      project: argocd
+      source:
+        repoURL: https://github.com/luismiguelsaez/argocd-playground
+        targetRevision: main
+        path: services
+        directory:
+          recurse: true
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: argocd
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: false
           allowEmpty: false
       retry:
         limit: 5

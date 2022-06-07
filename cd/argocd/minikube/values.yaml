@@ -62,7 +62,7 @@ server:
       namespace: argocd  # Namespace where to create the AppProject object
       additionalLabels: {}
       additionalAnnotations: {}
-      description: System workloads
+      description: Root project
       sourceRepos:
       - '*'
       destinations:
@@ -82,32 +82,51 @@ server:
         warn: false
   additionalApplications:
   # Doc: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/application.yaml
-    - name: infra       # Name for the Application object
-      namespace: argocd # Namespace where to create the Application object
-      project: main
+    - name: projects-infra # Name for the Application object
+      namespace: argocd    # Namespace where to create the Application object
+      project: argocd
       source:
         repoURL: https://github.com/luismiguelsaez/argocd-playground
         targetRevision: main
-        path: infra
+        path: infra/projects
+        directory:
+          recurse: true
+          jsonnet: {}
       destination:
         server: https://kubernetes.default.svc
         namespace: argocd
-      directory:
-        recurse: false
-        jsonnet:
-          extVars:
-          - name: foo
-            value: bar
-          - code: true
-            name: baz
-            value: "true"
-          tlas:
-          - code: false
-            name: foo
-            value: bar
       syncPolicy:
-        syncOptions:
-          - CreateNamespace=true
         automated:
           selfHeal: true
           prune: true
+          allowEmpty: false
+      retry:
+        limit: 5
+        backoff:
+          duration: 5s
+          factor: 2
+          maxDuration: 10m
+    - name: apps-infra  # Name for the Application object
+      namespace: argocd # Namespace where to create the Application object
+      project: argocd
+      source:
+        repoURL: https://github.com/luismiguelsaez/argocd-playground
+        targetRevision: main
+        path: infra/apps
+        directory:
+          recurse: true
+        jsonnet: {}
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: argocd
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: true
+          allowEmpty: false
+      retry:
+        limit: 5
+        backoff:
+          duration: 5s
+          factor: 2
+          maxDuration: 10m

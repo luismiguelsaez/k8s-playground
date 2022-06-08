@@ -20,7 +20,7 @@ configs:
     grafana:
       type: helm
       name: grafana
-      url: https://github.com/grafana/helm-charts
+      url: https://grafana.github.io/helm-charts
     bitnami:
       type: helm
       name: bitnami
@@ -34,8 +34,35 @@ configs:
     githubSecret: ""
     argocdServerAdminPassword: "$2a$10$zoUgs0Cox8AZsSgba3xsq.RVQoaZOFIJ/LL2rZcCs3uSrkxXE7QaG"
 
+controller:
+  metrics:
+    enabled: false
+    applicationLabels:
+      enabled: false
+      labels: []
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      relabelings: []
+      metricRelabelings: []
+      selector: {}
+      namespace: "argocd"
+
 server:
   name: cicd-main
+  logLevel: info
+  metrics:
+    enabled: false
+    applicationLabels:
+      enabled: false
+      labels: []
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      relabelings: []
+      metricRelabelings: []
+      selector: {}
+      namespace: "argocd"
   extraArgs:
     - --insecure
   ingress:

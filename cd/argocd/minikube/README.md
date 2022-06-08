@@ -4,18 +4,13 @@
 - Start minikube
   - Simple
     ```bash
-    minikube start
+    minikube start --addons=ingress
     ```
 
   - Multi node
     ```bash
-    minikube start --cni=cilium --kubernetes-version=1.22.3 --driver=virtualbox --nodes=3 --container-runtime=containerd
+    minikube start --cni=cilium --kubernetes-version=1.22.3 --driver=virtualbox --nodes=3 --container-runtime=containerd --addons=ingress
     ```
-
-- Enable ingress
-  ```bash
-  minikube addons enable ingress
-  ```
 
 ## Bootstrap ArgoCD
 
@@ -23,6 +18,10 @@
 helm install argocd argo/argo-cd -n argocd --values values.yaml --create-namespace --version 3.33.6
 ```
 
+## Connecto to ArgoCD UI
+
+- Get IP and host to configure `/etc/hosts` file
 ```bash
-k port-forward svc/argocd-cicd-main 8080:80 -n argocd
+kgi -n argocd argocd-cicd-main -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
+kgi -n argocd argocd-cicd-main -o jsonpath="{.spec.rules[0].host}"
 ```

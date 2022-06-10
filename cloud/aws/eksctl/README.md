@@ -17,6 +17,12 @@ export AWS_PROFILE=""
 eksctl create cluster --config-file cloud/aws/eksctl/single-ng-cluster.yaml
 ```
 
+## Update cluster after adding new nodegroup to config file
+
+```bash
+eksctl create nodegroup --config-file cloud/aws/eksctl/single-ng-cluster.yaml --include='monitoring'
+```
+
 ## Ingress configuration
 
 ### AWS [load balancer controller](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html)

@@ -56,12 +56,11 @@ flux install
   - Existing repository
     ```bash
     flux bootstrap github \
-      --context=minikube \
       --owner=luismiguelsaez \
       --repository=fluxcd-playground \
-      --branch=main \
+      --branch=test-cluster \
       --personal \
-      --path=clusters/live \
+      --path=clusters/test \
       --timeout=10m
     ```
   - Terraform provider: https://registry.terraform.io/providers/fluxcd/flux/latest/docs/guides/github

@@ -7,6 +7,10 @@ metadata:
   version: "1.22"
   region: eu-central-1
 
+karpenter:
+  version: '0.9.0'
+  createServiceAccount: true
+
 vpc:
   clusterEndpoints:
     publicAccess: true
@@ -38,6 +42,20 @@ nodeGroups:
     disableIMDSv1: true
     labels:
       nodegroup-type: default
+  - name: monitoring
+    instanceType: t3a.medium
+    minSize: 2
+    maxSize: 3
+    desiredCapacity: 2
+    amiFamily: Bottlerocket
+    privateNetworking: true
+    volumeSize: 50
+    volumeType: gp2
+    volumeEncrypted: true
+    disableIMDSv1: true
+    labels:
+      nodegroup/type: monitoring
+      nodegroup/instance-family: t3a
 
 iam:
   withOIDC: true

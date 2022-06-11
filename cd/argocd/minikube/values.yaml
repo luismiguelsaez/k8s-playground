@@ -35,6 +35,8 @@ configs:
     createSecret: true
     githubSecret: ""
     argocdServerAdminPassword: "$2a$10$zoUgs0Cox8AZsSgba3xsq.RVQoaZOFIJ/LL2rZcCs3uSrkxXE7QaG"
+  credentialTemplatesAnnotations:
+    managed-by: argocd.argoproj.io
 
 server:
   name: cicd-main
@@ -115,3 +117,5 @@ server:
           duration: 5s
           factor: 2
           maxDuration: 10m
+
+extraObjects: []

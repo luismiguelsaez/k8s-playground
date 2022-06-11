@@ -16,7 +16,7 @@
 
 ```bash
 helm install argocd argo/argo-cd -n argocd --values values.yaml --create-namespace --version 3.35.4
-k wait pod -l app.kubernetes.io/name=argocd-cicd-main --for=condition=Ready -n argocd --timeout=300s
+kubectl wait pod -l app.kubernetes.io/instance=argocd --for=condition=Ready -n argocd --timeout=300s
 ```
 
 ## Connecto to ArgoCD UI

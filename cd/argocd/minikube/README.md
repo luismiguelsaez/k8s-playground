@@ -23,6 +23,6 @@ kubectl wait pod -l app.kubernetes.io/instance=argocd --for=condition=Ready -n a
 
 - Get IP and host to configure `/etc/hosts` file
 ```bash
-kgi -n argocd argocd-cicd-main -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
-kgi -n argocd argocd-cicd-main -o jsonpath="{.spec.rules[0].host}"
+kubectl get ingress -n argocd argocd-cicd-main -o jsonpath="{.status.loadBalancer.ingress[0].ip}"
+kubectl get ingress -n argocd argocd-cicd-main -o jsonpath="{.spec.rules[0].host}"
 ```

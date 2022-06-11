@@ -35,6 +35,13 @@ configs:
     createSecret: true
     githubSecret: ""
     argocdServerAdminPassword: "$2a$10$zoUgs0Cox8AZsSgba3xsq.RVQoaZOFIJ/LL2rZcCs3uSrkxXE7QaG"
+  credentialTemplates:
+    corporate-git-ssh:
+      url: git@github.com:umbrellacorp
+      sshPrivatekey: |-
+        -----BEGIN OPENSSH PRIVATE KEY-----
+        ...
+        -----END OPENSSH PRIVATE KEY-----
   credentialTemplatesAnnotations:
     managed-by: argocd.argoproj.io
 
@@ -118,4 +125,19 @@ server:
           factor: 2
           maxDuration: 10m
 
-extraObjects: []
+extraObjects:
+  # Crafted secret for git-ssh credentials, because secrets created from `credentialTemplates` are not working
+  - apiVersion: v1
+    kind: Secret
+    type: Opaque
+    metadata:
+      annotations:
+        managed-by: argocd.argoproj.io
+      labels:
+        argocd.argoproj.io/secret-type: repo-creds
+      name: creds-1317606831
+      namespace: argocd
+    data:
+      # Base64 encoded SSH private key and Github repo template
+      sshPrivateKey: ""
+      url: ""

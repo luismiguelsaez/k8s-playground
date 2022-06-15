@@ -39,6 +39,10 @@ eksctl create nodegroup --config-file cloud/aws/eksctl/single-ng-cluster.yaml --
   helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=single-ng-lb-controller --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller --set region=eu-central-1 --set vpcId=vpc-047f2fc64d0ea743f
   ```
 
+### K8s external controller
+
+To manage DNS resolution, [external-dns](https://github.com/kubernetes-sigs/external-dns) is needed
+
 ### Nginx
 
 - Add helm chart

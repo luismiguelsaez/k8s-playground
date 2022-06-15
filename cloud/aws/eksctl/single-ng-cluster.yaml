@@ -7,21 +7,12 @@ metadata:
   version: "1.22"
   region: eu-central-1
 
-karpenter:
-  version: '0.9.0'
-  createServiceAccount: true
-
 vpc:
   clusterEndpoints:
     publicAccess: true
     privateAccess: true
   id: vpc-047f2fc64d0ea743f
   subnets:
-    #public:
-    #  public-one:
-    #    id: subnet-05e69719d6fa2cb94
-    #  public-two:
-    #    id: subnet-0d86cd2f70222c1b2
     private:
       private-one:
         id: subnet-0807feb9dd4003eb4
@@ -55,11 +46,51 @@ nodeGroups:
     disableIMDSv1: true
     labels:
       nodegroup/type: monitoring
-      nodegroup/instance-family: t3a
 
 iam:
   withOIDC: true
   serviceAccounts:
+  - metadata:
+      name: external-dns
+      namespace: kube-system
+    attachPolicy:
+      Version: "2012-10-17"
+      Statement:
+      - Effect: Allow
+        Action:
+        - "route53:ChangeResourceRecordSets"
+        Resource:
+        - "arn:aws:route53:::hostedzone/*"
+      - Effect: Allow
+        Action:
+        - "route53:ListHostedZones"
+        - "route53:ListResourceRecordSets"
+        Resource:
+        - "*"
+  - metadata:
+      name: karpenter
+      namespace: kube-system
+    attachPolicy:
+      Version: "2012-10-17"
+      Statement:
+      - Effect: Allow
+        Action:
+        - "ec2:CreateLaunchTemplate"
+        - "ec2:CreateFleet"
+        - "ec2:RunInstances"
+        - "ec2:CreateTags"
+        - "iam:PassRole"
+        - "ec2:TerminateInstances"
+        - "ec2:DescribeLaunchTemplates"
+        - "ec2:DeleteLaunchTemplate"
+        - "ec2:DescribeInstances"
+        - "ec2:DescribeSecurityGroups"
+        - "ec2:DescribeSubnets"
+        - "ec2:DescribeInstanceTypes"
+        - "ec2:DescribeInstanceTypeOfferings"
+        - "ec2:DescribeAvailabilityZones"
+        - "ssm:GetParameter"
+        Resource: '*'
   - metadata:
       name: aws-load-balancer-controller
       namespace: kube-system

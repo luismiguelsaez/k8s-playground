@@ -76,6 +76,14 @@ server:
     extraPaths: []
     tls: []
     https: false
+  extensions:
+    enable: true
+    image:
+      repository: "ghcr.io/argoproj-labs/argocd-extensions"
+      tag: "v0.2.0"
+    contents:
+      - name: rollout-extension
+        url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.0/extension.tar
   configEnabled: true
   config:
     url: ""

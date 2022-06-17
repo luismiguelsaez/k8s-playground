@@ -4,20 +4,20 @@
 - https://rtfm.co.ua/en/argocd-declarative-projects-applications-and-argocd-deploy-from-jenkins/#Projects
 
 ## Create cluster
-```
+```bash
 kind create cluster --name argo-test --config kind-cluster-4no-ingress.yml
 ```
 ## ArgoCD charts
 https://github.com/argoproj/argo-helm/tree/master/charts
 ## Add repository
-```
+```bash
 helm repo add argo https://argoproj.github.io/argo-helm
 ```
 ## Install ArgoCD
-```
+```bash
 kubectl create ns argocd
-helm install argocd argo/argo-cd -n argocd --values values-prod.yaml --create-namespace --version 4.8.3
-k wait --for=condition=ready pod -l app.kubernetes.io/instance=argocd --timeout=300s -n argocd
+helm install argocd argo/argo-cd --wait -n argocd --values values-prod.yaml --create-namespace --version 4.8.3
+kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=argocd --timeout=300s -n argocd
 ```
 ## Connect ArgoCD
 ### Get admin user initial password

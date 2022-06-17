@@ -31,6 +31,10 @@ configs:
       type: helm
       name: metrics-server
       url: https://kubernetes-sigs.github.io/metrics-server
+    argocd:
+      type: helm
+      name: argocd
+      url: https://argoproj.github.io/argo-helm
   secret:
     createSecret: true
     githubSecret: ""

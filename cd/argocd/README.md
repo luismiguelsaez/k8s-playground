@@ -17,7 +17,7 @@ helm repo add argo https://argoproj.github.io/argo-helm
 ```
 kubectl create ns argocd
 helm install argocd argo/argo-cd -n argocd --values values-prod.yaml --create-namespace --version 4.8.3
-k wait --for=condition=ready pod -l app.kubernetes.io/component=server --timeout=300s -n argocd
+k wait --for=condition=ready pod -l app.kubernetes.io/instance=argocd --timeout=300s -n argocd
 ```
 ## Connect ArgoCD
 ### Get admin user initial password

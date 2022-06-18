@@ -156,13 +156,13 @@ extraObjects:
   - apiVersion: argoproj.io/v1alpha1
     kind: ArgoCDExtension
     metadata:
-    name: hello-world
-    finalizers:
-      - extensions-finalizer.argocd.argoproj.io
+      name: hello-world
+      finalizers:
+        - extensions-finalizer.argocd.argoproj.io
     spec:
       sources:
         #- git:
-        #  url: https://github.com/argoproj-labs/argocd-example-extension.git
+        #    url: https://github.com/argoproj-labs/argocd-example-extension.git
         - web:
-          url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.0/extension.tar 
+            url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.0/extension.tar 
 

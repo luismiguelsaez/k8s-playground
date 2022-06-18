@@ -15,7 +15,7 @@
 ## Bootstrap ArgoCD
 
 ```bash
-helm install argocd argo/argo-cd -n argocd --values values.yaml --create-namespace --version 3.35.4
+helm install argocd argo/argo-cd -n argocd --values values.yaml --create-namespace --version 4.9.4 
 kubectl wait pod -l app.kubernetes.io/instance=argocd --for=condition=Ready -n argocd --timeout=300s
 ```
 

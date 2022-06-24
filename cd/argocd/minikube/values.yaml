@@ -87,6 +87,14 @@ server:
   configEnabled: true
   config:
     url: ""
+    configManagementPlugins: |-
+      - name: kustomized-helm
+        init:
+          command: ["/bin/sh", "-c"]
+          args: ["helm dependency build"]
+        generate:
+          command: [sh, -c]
+          args: ["helm template --release-name release-name . > all.yaml && kustomize build"]
     #kustomize.path.v3.5.1: /custom-tools/kustomize_3_5_1
     #kustomize.path.v3.5.4: /custom-tools/kustomize_3_5_4
   configAnnotations: {}

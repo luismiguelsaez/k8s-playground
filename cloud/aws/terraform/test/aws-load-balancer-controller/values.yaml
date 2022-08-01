@@ -1,0 +1,11 @@
+---
+
+clusterName: k8s-test
+serviceAccount:
+  create: true
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::484308071187:role/aws-load-balancer-controller@kube-system # Name from IAM policy for EKS
+  name: aws-load-balancer-controller
+
+region: eu-central-1
+#vpcId: vpc-0d6aa2304efd1cae4

@@ -2,7 +2,7 @@
 
 clusterName: single-ng-lb-controller
 serviceAccount:
-  create: false
+  create: true
   annotations: {}
   name: aws-load-balancer-controller
 

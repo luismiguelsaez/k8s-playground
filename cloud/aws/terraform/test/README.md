@@ -53,6 +53,11 @@
 
 - Test
 
+  - Export vars
+    ```bash
+    EXTERNAL_DNS_NAME=test.example.com
+    ```
+
   - NLB
     ```bash
     k expose deploy nginx --name=nginx --port=8080 --target-port=80 --type=LoadBalancer
@@ -77,7 +82,7 @@
         app: nginx
     spec:
       rules:
-        - host: test-nginx.example.com
+        - host: ${EXTERNAL_DNS_NAME:-nginx.example.com}
           http:
             paths:
             - path: /
@@ -90,4 +95,22 @@
     EOF
     ```
 
+# Install `external-dns`
+
+- [docs](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md)
+
+- Install from Helm repo
+  ```
+  helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
+
+  helm upgrade --install external-dns external-dns/external-dns -n kube-system -f external-dns/values.yaml
+  ```
+
 # ArgoCD autopilot install
+
+- [docs](https://github.com/argoproj-labs/argocd-autopilot)
+
+- Bootstrap repo
+  ```
+  argocd-autopilot repo bootstrap -n argocd --upsert-branch test-autopilot --repo https://github.com/luismiguelsaez/argocd-playground --git-token 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
+  ```

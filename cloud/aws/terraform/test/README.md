@@ -112,5 +112,5 @@
 
 - Bootstrap repo
   ```
-  argocd-autopilot repo bootstrap -n argocd --upsert-branch test-autopilot --repo https://github.com/luismiguelsaez/argocd-playground --git-token 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
+  argocd-autopilot repo bootstrap -n argocd --upsert-branch test-autopilot --repo https://github.com/luismiguelsaez/argocd-playground --git-token ghp_S3RAKkbpeNq75EI7********
   ```

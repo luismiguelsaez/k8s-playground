@@ -1,0 +1,179 @@
+configs:
+  knownHostsAnnotations: {}
+  knownHosts:
+    data:
+      ssh_known_hosts: |
+        github.com ecdsa-sha2-nistp256 AAAAE2VjZHNhLXNoYTItbmlzdHAyNTYAAAAIbmlzdHAyNTYAAABBBEmKSENjQEezOmxkZMy7opKgwFB9nkt5YRrYMjNuG5N87uRgg6CLrbo5wAdT/y6v0mKV0U2w0WZ2YB/++Tpockg=
+        github.com ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIOMqqnkVzrm0SdG6UOoqKLsabgH5C9okWi0dh2l9GKJl
+        github.com ssh-rsa AAAAB3NzaC1yc2EAAAABIwAAAQEAq2A7hRGmdnm9tUDbO9IDSwBK6TbQa+PXYPCPy6rbTrTtw7PHkccKrpp0yVhp5HdEIcKr6pLlVDBfOLX9QUsyCOV0wzfjIJNlGEYsdlLJizHhbn2mUjvSAHQqZETYP81eFzLQNnPHt4EVVUh7VfDESU84KezmD5QlWpXLmvU31/yMf+Se8xhHTvKSCZIFImWwoG6mbUoWf9nzpIoaSjB+weqqUUmpaaasXVal72J+UX2B+2RPW3RcT0eOzQgqlJL3RKrTJvdsjE3JEAvGq3lGHSZXy28G3skua2SmVi/w4yCE6gbODqnTWlg7+wC604ydGXA8VJiS5ap43JXiUFFAaQ==
+  repositories:
+    eks:
+      type: helm
+      name: eks
+      url: https://aws.github.io/eks-charts
+    external-dns:
+      type: helm
+      name: external-dns
+      url: https://kubernetes-sigs.github.io/external-dns
+    elastic:
+      type: git
+      name: elastic
+      url: https://github.com/elastic/helm-charts
+    prometheus-community:
+      type: helm
+      name: prometheus-community
+      url: https://prometheus-community.github.io/helm-charts
+    bitnami:
+      type: helm
+      name: bitnami
+      url: https://charts.bitnami.com/bitnami
+    metrics-server:
+      type: helm
+      name: metrics-server
+      url: https://kubernetes-sigs.github.io/metrics-server
+    argocd:
+      type: helm
+      name: argocd
+      url: https://argoproj.github.io/argo-helm
+  secret:
+    createSecret: true
+    githubSecret: ""
+    argocdServerAdminPassword: "$2a$10$zoUgs0Cox8AZsSgba3xsq.RVQoaZOFIJ/LL2rZcCs3uSrkxXE7QaG"
+  credentialTemplates:
+    corporate-git-ssh:
+      url: git@github.com:umbrellacorp
+      sshPrivatekey: |-
+        -----BEGIN OPENSSH PRIVATE KEY-----
+        ...
+        -----END OPENSSH PRIVATE KEY-----
+  credentialTemplatesAnnotations:
+    managed-by: argocd.argoproj.io
+
+server:
+  name: cicd-main
+  logLevel: info
+  metrics:
+    enabled: false
+    applicationLabels:
+      enabled: false
+    serviceMonitor:
+      enabled: true
+      interval: 30s
+      namespace: "argocd"
+  extraArgs:
+    - --insecure
+  service:
+    annotations: {}
+    type: NodePort
+  ingress:
+    enabled: true
+    annotations:
+      kubernetes.io/ingress.class: alb
+      alb.ingress.kubernetes.io/scheme: internet-facing
+      alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+    labels: {}
+    hosts:
+      - argocd.dev.lokalise.cloud
+    paths:
+      - /
+    pathType: Prefix
+    extraPaths: []
+    tls: []
+    https: false
+  extensions:
+    enable: true
+    image:
+      repository: "ghcr.io/argoproj-labs/argocd-extensions"
+      tag: "v0.1.0"
+    contents:
+      - name: rollout-extension
+        url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.0/extension.tar
+  configEnabled: true
+  config:
+    url: ""
+    configManagementPlugins: |-
+      - name: kustomized-helm
+        init:
+          command: ["/bin/sh", "-c"]
+          args: ["helm dependency build"]
+        generate:
+          command: [sh, -c]
+          args: ["helm template --release-name release-name . > all.yaml && kustomize build"]
+  configAnnotations: {}
+  additionalProjects:
+  # Doc: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/project.yaml
+    - name: argocd       # Name for the AppProject object
+      namespace: argocd  # Namespace where to create the AppProject object
+      additionalLabels: {}
+      additionalAnnotations: {}
+      description: Root project
+      sourceRepos:
+      - '*'
+      destinations:
+      - namespace: argocd
+        server: https://kubernetes.default.svc
+      - namespace: kube-system
+        server: https://kubernetes.default.svc
+      - namespace: monitoring
+        server: https://kubernetes.default.svc
+      namespaceResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      clusterResourceWhitelist:
+      - group: '*'
+        kind: '*'
+      orphanedResources:
+        warn: false
+  additionalApplications:
+    - name: argocd      # Name for the Application object
+      namespace: argocd # Namespace where to create the Application object
+      project: argocd
+      source:
+        repoURL: https://github.com/luismiguelsaez/argocd-playground
+        targetRevision: main
+        path: overlays/eks-dev 
+      destination:
+        server: https://kubernetes.default.svc
+        namespace: argocd
+      syncPolicy:
+        automated:
+          selfHeal: true
+          prune: false
+          allowEmpty: false
+      retry:
+        limit: 5
+        backoff:
+          duration: 5s
+          factor: 2
+          maxDuration: 10m
+
+extraObjects:
+  # Crafted secret for git-ssh credentials, because secrets created from `credentialTemplates` are not working
+  - apiVersion: v1
+    kind: Secret
+    type: Opaque
+    metadata:
+      annotations:
+        managed-by: argocd.argoproj.io
+      labels:
+        argocd.argoproj.io/secret-type: repo-creds
+      name: creds-1317606831
+      namespace: argocd
+    data:
+      # Base64 encoded SSH private key and Github repo template
+      sshPrivateKey: ""
+      url: ""
+  - apiVersion: argoproj.io/v1alpha1
+    kind: ArgoCDExtension
+    metadata:
+      name: argo-rollouts-ui 
+      finalizers:
+        - extensions-finalizer.argocd.argoproj.io
+    spec:
+      sources:
+        #- git:
+        #    url: https://github.com/argoproj-labs/argocd-example-extension.git
+        - web:
+            url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.0/extension.tar 
+

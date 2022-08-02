@@ -46,6 +46,11 @@ module "eks-nodegroup-monitoring" {
   cluster_primary_security_group_id = module.eks_cluster.cluster_primary_security_group_id
   vpc_security_group_ids            = [ module.eks_cluster.cluster_security_group_id ]
 
+  tags = {
+    "k8s.io/cluster-autoscaler/enabled" = "true"
+    "k8s.io/cluster-autoscaler/${var.name}" = "owned"
+  }
+
   metadata_options = {
     "http_endpoint": "enabled",
     "http_put_response_hop_limit": 2,

@@ -4,6 +4,7 @@ provider "aws" {
   default_tags {
     tags = {
       Project = "k8s-test"
+      Owner = "luismiguel.saez"
     }
   }
 }

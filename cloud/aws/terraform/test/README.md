@@ -1,5 +1,5 @@
 
-# Create cluster
+## Create cluster
 
 - Create infra
   ```bash
@@ -13,7 +13,7 @@
   aws eks update-kubeconfig --name k8s-test
   ```
 
-# Cillium install ( [docs](https://docs.cilium.io/en/v1.9/gettingstarted/k8s-install-eks/) )
+## Cillium install ( [docs](https://docs.cilium.io/en/v1.9/gettingstarted/k8s-install-eks/) )
 
 - Install `Cilium CNI` ( CLI )
   ```bash
@@ -42,7 +42,26 @@
   k run test --image=busybox --rm -it --command -- sh -c "wget -O- --timeout 2 http://nginx.default.svc:8080"
   ```
 
-# Install `aws-load-balancer-controller`
+# Install `argocd`
+
+### Helm chart
+
+- Install from Helm chart
+  ```
+  helm repo add argo https://argoproj.github.io/argo-helm
+  helm upgrade --install argocd argo/argo-cd --wait -n argocd --values argocd/values.yaml --create-namespace --version 4.10.4
+  ```
+
+### Autopilot
+
+- [docs](https://github.com/argoproj-labs/argocd-autopilot)
+
+- Bootstrap repo
+  ```
+  argocd-autopilot repo bootstrap -n argocd --upsert-branch test-autopilot --repo https://github.com/luismiguelsaez/argocd-playground --git-token ghp_S3RAKkbpeNq75EI7********
+  ```
+
+## Install `aws-load-balancer-controller`
 
 - Install from Helm repo
   ```bash
@@ -95,22 +114,13 @@
     EOF
     ```
 
-# Install `external-dns`
+## Install `external-dns`
 
 - [docs](https://github.com/kubernetes-sigs/external-dns/blob/master/docs/tutorials/aws.md)
 
 - Install from Helm repo
   ```
   helm repo add external-dns https://kubernetes-sigs.github.io/external-dns/
-
   helm upgrade --install external-dns external-dns/external-dns -n kube-system -f external-dns/values.yaml
   ```
 
-# ArgoCD autopilot install
-
-- [docs](https://github.com/argoproj-labs/argocd-autopilot)
-
-- Bootstrap repo
-  ```
-  argocd-autopilot repo bootstrap -n argocd --upsert-branch test-autopilot --repo https://github.com/luismiguelsaez/argocd-playground --git-token ghp_S3RAKkbpeNq75EI7********
-  ```

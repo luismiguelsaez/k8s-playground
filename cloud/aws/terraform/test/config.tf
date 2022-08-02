@@ -9,10 +9,10 @@ provider "aws" {
   }
 }
 
-#provider "helm" {
-#  kubernetes {
-#    host = module.eks_cluster.cluster_endpoint
-#    token = data.aws_eks_cluster_auth.main.token
-#    cluster_ca_certificate = base64decode(module.eks_cluster.cluster_certificate_authority_data)
-#  }
-#}
+provider "helm" {
+  kubernetes {
+    host = data.aws_eks_cluster.main.endpoint
+    token = data.aws_eks_cluster_auth.main.token
+    cluster_ca_certificate = base64decode(data.aws_eks_cluster.main.certificate_authority[0].data)
+  }
+}

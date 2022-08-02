@@ -3,6 +3,8 @@ module "eks_cluster" {
   source  = "terraform-aws-modules/eks/aws"
   version = "18.26.6"
 
+  create = true
+
   cluster_name    = var.name
   cluster_version = "1.22"
 
@@ -29,6 +31,8 @@ module "eks-nodegroup-monitoring" {
   source  = "terraform-aws-modules/eks/aws//modules/eks-managed-node-group"
   version = "18.26.6"
 
+  create = true
+
   name            = "monitoring"
   cluster_name    = module.eks_cluster.cluster_id
   cluster_version = module.eks_cluster.cluster_version
@@ -47,13 +51,13 @@ module "eks-nodegroup-monitoring" {
   vpc_security_group_ids            = [ module.eks_cluster.cluster_security_group_id ]
 
   tags = {
-    "k8s.io/cluster-autoscaler/enabled" = "true"
+    "k8s.io/cluster-autoscaler/enabled" = "true",
     "k8s.io/cluster-autoscaler/${var.name}" = "owned"
   }
 
   metadata_options = {
     "http_endpoint": "enabled",
-    "http_put_response_hop_limit": 2,
+    "http_put_response_hop_limit": "2",
     "http_tokens": "required"
   }
 
@@ -63,4 +67,6 @@ module "eks-nodegroup-monitoring" {
     "project": "k8s-test",
     "service": "monitoring"
   }
+
+  #depends_on = [ helm_release.cilium ]
 }

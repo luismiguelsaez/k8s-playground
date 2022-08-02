@@ -4,3 +4,11 @@ cni:
 
 enableIPv4Masquerade: false
 tunnel: disabled
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 512Mi
+  requests:
+    cpu: 500m
+    memory: 256Mi

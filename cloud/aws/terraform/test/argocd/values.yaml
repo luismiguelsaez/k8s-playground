@@ -42,15 +42,6 @@ configs:
     createSecret: true
     githubSecret: ""
     argocdServerAdminPassword: "${ adminPass }"
-  credentialTemplates:
-    corporate-git-ssh:
-      url: git@github.com:umbrellacorp
-      sshPrivatekey: |-
-        -----BEGIN OPENSSH PRIVATE KEY-----
-        ...
-        -----END OPENSSH PRIVATE KEY-----
-  credentialTemplatesAnnotations:
-    managed-by: argocd.argoproj.io
 
 controller:
   replicas: 2
@@ -96,9 +87,6 @@ repoServer:
       - get
       - list
       - watch
-  #envFrom:
-  #  - secretRef:
-  #      name: vault-configuration
   volumes:
   - name: custom-tools
     emptyDir: {}
@@ -352,15 +340,3 @@ extraObjects:
       url: "${ repoUrl }"
       password: "${ repoToken }"
       username: "not-used"
-  - apiVersion: argoproj.io/v1alpha1
-    kind: ArgoCDExtension
-    metadata:
-      name: argo-rollouts-ui 
-      finalizers:
-        - extensions-finalizer.argocd.argoproj.io
-    spec:
-      sources:
-        #- git:
-        #    url: https://github.com/argoproj-labs/argocd-example-extension.git
-        - web:
-            url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.0/extension.tar 

@@ -1,3 +1,6 @@
+
+fullnameOverride: "argocd"
+
 configs:
   knownHostsAnnotations: {}
   knownHosts:
@@ -38,7 +41,7 @@ configs:
   secret:
     createSecret: true
     githubSecret: ""
-    argocdServerAdminPassword: "$2a$10$zoUgs0Cox8AZsSgba3xsq.RVQoaZOFIJ/LL2rZcCs3uSrkxXE7QaG"
+    argocdServerAdminPassword: "${ adminPass }"
   credentialTemplates:
     corporate-git-ssh:
       url: git@github.com:umbrellacorp
@@ -50,10 +53,20 @@ configs:
     managed-by: argocd.argoproj.io
 
 controller:
+  replicas: 2
+  enableStatefulSet: true
+  nodeSelector: {}
+  priorityClassName: ""
+  logFormat: json
+  logLevel: error
+  metrics:
+    enable: true
+    serviceMonitor:
+      enabled: true
   resources:
     limits:
-      cpu: 500m
-      memory: 256Mi
+      cpu: 1000m
+      memory: 1Gi
     requests:
       cpu: 250m
       memory: 128Mi
@@ -68,6 +81,40 @@ dex:
       memory: 64Mi
 
 repoServer:
+  nodeSelector: {}
+  serviceAccount:
+    create: true
+    name: argocd-repo-server
+    annotations: {}
+    automountServiceAccountToken: true
+  rbac:
+    - apiGroups:
+      - ''
+      resources:
+      - secrets
+      verbs:
+      - get
+      - list
+      - watch
+  #envFrom:
+  #  - secretRef:
+  #      name: vault-configuration
+  volumes:
+  - name: custom-tools
+    emptyDir: {}
+  initContainers:
+  - name: download-tools
+    image: alpine:3.8
+    command: [sh, -c]
+    args:
+      - wget -q https://github.com/argoproj-labs/argocd-vault-plugin/releases/download/v1.12.0/argocd-vault-plugin_1.12.0_linux_amd64 -O/custom-tools/argocd-vault-plugin && chmod +x /custom-tools/argocd-vault-plugin
+    volumeMounts:
+    - mountPath: /custom-tools
+      name: custom-tools
+  volumeMounts:
+  - mountPath: /usr/local/bin/argocd-vault-plugin
+    name: custom-tools
+    subPath: argocd-vault-plugin
   resources:
     limits:
       cpu: 100m
@@ -86,6 +133,14 @@ applicationSet:
       memory: 128Mi
 
 notifications:
+  #enabled: true
+  #secret:
+  #  create: true
+  #  items:
+  #    slack-token: "${ notificationsSlackToken }"
+  #notifiers:
+  #  service.slack:
+  #    token: $slack-token
   resources:
     limits:
       cpu: 100m
@@ -128,14 +183,16 @@ server:
     type: NodePort
   ingress:
     enabled: true
+    ingressClassName: alb
     annotations:
-      kubernetes.io/ingress.class: alb
       alb.ingress.kubernetes.io/scheme: internet-facing
       alb.ingress.kubernetes.io/inbound-cidrs: 0.0.0.0/0
-      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}]'
+      alb.ingress.kubernetes.io/certificate-arn: ${ certificateArn }
+      alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80},{"HTTPS": 443}]'
+      alb.ingress.kubernetes.io/ssl-redirect: '443'
     labels: {}
     hosts:
-      - argocd.dev.lokalise.cloud
+      - ${ argoCDHost }
     paths:
       - /
     pathType: Prefix
@@ -152,16 +209,63 @@ server:
         url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.0/extension.tar
   configEnabled: true
   config:
-    url: ""
-    configManagementPlugins: |-
-      - name: kustomized-helm
-        init:
-          command: ["/bin/sh", "-c"]
-          args: ["helm dependency build"]
+    url: "https://argocd.dev.lokalise.cloud"
+    dex.config: |-
+      logger:
+        level: debug
+        format: json
+      connectors:
+      - type: saml
+        id: okta
+        name: Okta
+        config:
+          issuer: ${ oktaIssuer }
+          ssoURL: ${ oktaSSOUrl }
+          caData: ${ oktaCAData }
+          redirectURI: https://${ argoCDHost }/api/dex/callback
+          usernameAttr: email
+          emailAttr: email
+          groupsAttr: group
+    configManagementPlugins: |
+
+      - name: argocd-vault-plugin
+        generate:
+          command: [argocd-vault-plugin]
+          args:
+            - |
+              generate ./ -s $${ARGOCD_ENV_ARGOCD_NAMESPACE:-"argocd"}:$${ARGOCD_ENV_AVP_SECRET:-"vault-configuration"}
+
+      - name: argocd-vault-plugin-kustomize
         generate:
           command: [sh, -c]
-          args: ["helm template --release-name release-name . > all.yaml && kustomize build"]
+          args:
+            - |
+              kustomize build . |\
+              argocd-vault-plugin generate - -s $${ARGOCD_ENV_ARGOCD_NAMESPACE:-"argocd"}:$${ARGOCD_ENV_AVP_SECRET:-"vault-configuration"}
+
+      - name: argocd-vault-plugin-helm
+        init:
+          command: [sh, -c]
+          args:
+            - |
+              helm dependency build
+        generate:
+          command: [sh, -c]
+          args:
+            - |
+              helm template $ARGOCD_APP_NAME . $${ARGOCD_ENV_HELM_ARGS} |\
+              argocd-vault-plugin generate - -s $${ARGOCD_ENV_ARGOCD_NAMESPACE:-"argocd"}:$${ARGOCD_ENV_AVP_SECRET:-"vault-configuration"}
+
   configAnnotations: {}
+  rbacConfigCreate: true
+  rbacConfig:
+    admin.enabled: "true"
+    policy.csv: |
+      g, Engineering, role:readonly
+      g, Platform, role:admin
+    policy.default: role:readonly
+    scopes: '[email, groups]'
+  rbacConfigAnnotations: {}
   additionalProjects:
   # Doc: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/project.yaml
     - name: argocd       # Name for the AppProject object
@@ -191,9 +295,9 @@ server:
       namespace: argocd # Namespace where to create the Application object
       project: argocd
       source:
-        repoURL: https://github.com/luismiguelsaez/argocd-playground
+        repoURL: "${ repoUrl }"
         targetRevision: main
-        path: overlays/eks-dev 
+        path: "${ repoPath }"
       destination:
         server: https://kubernetes.default.svc
         namespace: argocd
@@ -210,7 +314,30 @@ server:
           maxDuration: 10m
 
 extraObjects:
-  # Crafted secret for git-ssh credentials, because secrets created from `credentialTemplates` are not working
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: vault-configuration
+      namespace: argocd
+    type: Opaque
+    stringData:
+      VAULT_ADDR: "${ vault_addr }"
+      AVP_TYPE: "vault"
+      AVP_KV_VERSION: "2"
+      AVP_AUTH_TYPE: "token"
+      VAULT_TOKEN: "${ vault_token }"
+  - apiVersion: v1
+    kind: Secret
+    metadata:
+      name: private-corp-repo-creds
+      namespace: argocd
+      labels:
+        argocd.argoproj.io/secret-type: repo-creds
+    stringData:
+      type: git
+      url: "${ corpRepoUrl }"
+      password: "${ corpRepoToken }"
+      username: "not-used"
   - apiVersion: v1
     kind: Secret
     type: Opaque
@@ -218,13 +345,13 @@ extraObjects:
       annotations:
         managed-by: argocd.argoproj.io
       labels:
-        argocd.argoproj.io/secret-type: repo-creds
-      name: creds-1317606831
+        argocd.argoproj.io/secret-type: repository
+      name: private-infra-repo
       namespace: argocd
-    data:
-      # Base64 encoded SSH private key and Github repo template
-      sshPrivateKey: ""
-      url: ""
+    stringData:
+      url: "${ repoUrl }"
+      password: "${ repoToken }"
+      username: "not-used"
   - apiVersion: argoproj.io/v1alpha1
     kind: ArgoCDExtension
     metadata:
@@ -237,4 +364,3 @@ extraObjects:
         #    url: https://github.com/argoproj-labs/argocd-example-extension.git
         - web:
             url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.0/extension.tar 
-

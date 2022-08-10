@@ -1,0 +1,21 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: kustomize-test
+spec:
+  destination:
+    name: ''
+    namespace: default
+    server: 'https://kubernetes.default.svc'
+  project: default
+  source:
+    plugin:
+      name: argocd-vault-plugin-kustomize
+      env:
+        - name: ARGOCD_NAMESPACE
+          value: argocd
+        - name: AVP_SECRET
+          value: vault-configuration
+    repoURL: https://github.com/luismiguelsaez/kustomize-playground
+    targetRevision: HEAD
+    path: nginx/overlays/dev

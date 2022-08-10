@@ -1,0 +1,25 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: test
+spec:
+  destination:
+    name: ''
+    namespace: default
+    server: 'https://kubernetes.default.svc'
+  source:
+    path: nginx
+    plugin:
+      name: argocd-vault-plugin-helm
+      env:
+        - name: ARGOCD_NAMESPACE
+          value: argocd
+        - name: AVP_SECRET
+          value: vault-configuration
+        - name: HELM_ARGS
+          value: |
+            --include-crds
+            --set replicaCount=2
+    repoURL: https://github.com/luismiguelsaez/helm-charts
+    targetRevision: main
+  project: default

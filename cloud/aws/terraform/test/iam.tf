@@ -34,3 +34,15 @@ module "eks_iam_role_cluster_autoscaler" {
   service_account_namespace = "kube-system"
   aws_iam_policy_document = file("cluster-autoscaler/iam-policy.json")
 }
+
+module "eks_iam_role_cluster_karpenter" {
+  source  = "cloudposse/eks-iam-role/aws"
+  version = "1.1.0"
+
+  aws_account_number          = data.aws_caller_identity.current.account_id
+  eks_cluster_oidc_issuer_url = module.eks_cluster.cluster_oidc_issuer_url
+
+  service_account_name      = "karpenter"
+  service_account_namespace = "kube-system"
+  aws_iam_policy_document = file("karpenter/iam-policy.json")
+}

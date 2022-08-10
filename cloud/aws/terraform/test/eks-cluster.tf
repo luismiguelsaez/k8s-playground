@@ -11,19 +11,16 @@ module "eks_cluster" {
   cluster_endpoint_private_access = true
   cluster_endpoint_public_access  = true
 
+  cluster_enabled_log_types = ["api","audit","authenticator","controllerManager","scheduler"]
+
+  create_cloudwatch_log_group            = true
+  cloudwatch_log_group_retention_in_days = 30
+
   vpc_id                   = module.vpc.vpc_id
   subnet_ids               = module.vpc.private_subnets
   control_plane_subnet_ids = module.vpc.intra_subnets
 
   manage_aws_auth_configmap = false
-  #aws_auth_accounts = [data.aws_caller_identity.current.account_id]
-  #aws_auth_roles = [
-  #  {
-  #    rolearn  = "arn:aws:iam::${data.aws_caller_identity.current.account_id}:role/Admin"
-  #    username = "Admin"
-  #    groups   = ["system:masters"]
-  #  },
-  #]
 }
 
 # https://registry.terraform.io/modules/terraform-aws-modules/eks/aws/18.26.6/submodules/eks-managed-node-group?tab=inputs
@@ -39,7 +36,7 @@ module "eks-nodegroup-monitoring" {
 
   platform       = "linux"
   capacity_type  = "ON_DEMAND"
-  instance_types = [ "t3a.medium","t3.medium","c5a.large","c5.large" ]
+  instance_types = [ "c5a.2xlarge","c5.2xlarge" ]
 
   min_size     = 1
   desired_size = 2

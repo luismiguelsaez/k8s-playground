@@ -86,7 +86,32 @@ server:
         url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.0/extension.tar
   configEnabled: true
   config:
-    url: ""
+    url: "https://argocd.minikube.cloud"
+    dex.config: |-
+      logger:
+        level: debug
+        format: json
+      connectors:
+      - type: google
+        id: google
+        name: Google
+        config:
+          issuer: https://accounts.google.com
+          clientID: "475209831594-0000.apps.googleusercontent.com"
+          clientSecret: "GOCSPX-0000"
+          redirectURI: https://argocd.minikube.cloud/api/dex/callback
+      - type: saml
+        id: okta
+        name: Okta
+        config:
+          issuer: http://www.okta.com/exk8iq0iovVYS8rfY4x7
+          ssoURL: https://umbrellacorp.okta.com/app/umbrellacorp_agrocd_1/exk8iq0iovVYS8rfY4x7/sso/saml
+          caData: |
+            LS0tLS1CRUdJTiBDR==
+          redirectURI: https://argocd.minikube.cloud/api/dex/callback
+          usernameAttr: email
+          emailAttr: email
+          groupsAttr: group
     configManagementPlugins: |-
       - name: kustomized-helm
         init:
@@ -98,6 +123,13 @@ server:
     #kustomize.path.v3.5.1: /custom-tools/kustomize_3_5_1
     #kustomize.path.v3.5.4: /custom-tools/kustomize_3_5_4
   configAnnotations: {}
+  rbacConfigCreate: true
+  rbacConfig:
+    admin.enabled: "true"
+    policy.csv: |
+      g, luismiguel.saez@umbrellacorp.com, role:admin
+    policy.default: role:readonly
+    scopes: '[email,groups]'
   additionalProjects:
   # Doc: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/project.yaml
     - name: argocd       # Name for the AppProject object

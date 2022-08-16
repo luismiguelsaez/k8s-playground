@@ -49,6 +49,51 @@ configs:
   credentialTemplatesAnnotations:
     managed-by: argocd.argoproj.io
 
+controller:
+  replicas: 2
+  enableStatefulSet: true
+  nodeSelector: {}
+  priorityClassName: ""
+  logFormat: json
+  logLevel: error
+  metrics:
+    enable: true
+    serviceMonitor:
+      enabled: true
+
+repoServer:
+  nodeSelector: {}
+  serviceAccount:
+    create: true
+    name: argocd-repo-server
+    annotations: {}
+    automountServiceAccountToken: true
+  rbac:
+    - apiGroups:
+      - ''
+      resources:
+      - secrets
+      verbs:
+      - get
+      - list
+      - watch
+  volumes:
+  - name: custom-tools
+    emptyDir: {}
+  initContainers:
+  - name: download-tools
+    image: alpine:3.8
+    command: [sh, -c]
+    args:
+      - wget -q https://github.com/argoproj-labs/argocd-vault-plugin/releases/download/v1.12.0/argocd-vault-plugin_1.12.0_linux_amd64 -O/custom-tools/argocd-vault-plugin && chmod +x /custom-tools/argocd-vault-plugin
+    volumeMounts:
+    - mountPath: /custom-tools
+      name: custom-tools
+  volumeMounts:
+  - mountPath: /usr/local/bin/argocd-vault-plugin
+    name: custom-tools
+    subPath: argocd-vault-plugin
+
 server:
   name: cicd-main
   logLevel: info
@@ -87,6 +132,22 @@ server:
   configEnabled: true
   config:
     url: "https://argocd.minikube.cloud"
+    ui.bannercontent: "Welcome to Minikube ArgoCD!"
+    resource.customizations.useOpenLibs.argoproj.io_Application: "true"
+    resource.customizations.health.argoproj.io_Application: |
+      hs = {}
+      hs.status = "Progressing"
+      hs.message = ""
+      if obj.status ~= nil then
+        if obj.status.health ~= nil then
+          hs.status = obj.status.health.status
+          if obj.status.health.message ~= nil then
+            hs.message = obj.status.health.message
+          end
+        end
+      end
+      hs.message = "Waiting for Application"
+      return hs
     dex.config: |-
       logger:
         level: debug
@@ -112,16 +173,34 @@ server:
           usernameAttr: email
           emailAttr: email
           groupsAttr: group
-    configManagementPlugins: |-
-      - name: kustomized-helm
-        init:
-          command: ["/bin/sh", "-c"]
-          args: ["helm dependency build"]
+    configManagementPlugins: |
+
+      - name: argocd-vault-plugin
+        generate:
+          command: [argocd-vault-plugin]
+          args:
+            - |
+              generate ./ -s $ARGOCD_ENV_ARGOCD_NAMESPACE:$ARGOCD_ENV_AVP_SECRET
+      - name: argocd-vault-plugin-kustomize
         generate:
           command: [sh, -c]
-          args: ["helm template --release-name release-name . > all.yaml && kustomize build"]
-    #kustomize.path.v3.5.1: /custom-tools/kustomize_3_5_1
-    #kustomize.path.v3.5.4: /custom-tools/kustomize_3_5_4
+          args:
+            - |
+              kustomize build . |\
+              argocd-vault-plugin generate - -s $ARGOCD_ENV_ARGOCD_NAMESPACE:$ARGOCD_ENV_AVP_SECRET
+      - name: argocd-vault-plugin-helm
+        init:
+          command: [sh, -c]
+          args:
+            - |
+              helm dependency build
+        generate:
+          command: [sh, -c]
+          args:
+            - |
+              helm template $ARGOCD_APP_NAME . $ARGOCD_ENV_HELM_ARGS |\
+              argocd-vault-plugin generate - -s $ARGOCD_ENV_ARGOCD_NAMESPACE:$ARGOCD_ENV_AVP_SECRET
+
   configAnnotations: {}
   rbacConfigCreate: true
   rbacConfig:

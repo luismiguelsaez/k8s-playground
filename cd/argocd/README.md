@@ -16,7 +16,7 @@ helm repo add argo https://argoproj.github.io/argo-helm
 ## Install ArgoCD
 ```bash
 kubectl create ns argocd
-helm install argocd argo/argo-cd --wait -n argocd --values values-prod.yaml --create-namespace --version 4.9.4
+helm upgrade --install argocd argo/argo-cd --wait -n argocd --values values.yaml --create-namespace --version 4.10.6
 kubectl wait --for=condition=ready pod -l app.kubernetes.io/instance=argocd --timeout=300s -n argocd
 ```
 ## Connect ArgoCD

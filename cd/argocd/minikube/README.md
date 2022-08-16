@@ -9,13 +9,13 @@
 
   - Multi node
     ```bash
-    minikube start --cni=cilium --kubernetes-version=1.22.3 --driver=virtualbox --nodes=3 --container-runtime=containerd --addons=ingress
+    minikube start --kubernetes-version=1.22.3 --driver=docker --nodes=3 --container-runtime=containerd --addons=ingress
     ```
 
 ## Bootstrap ArgoCD
 
 ```bash
-helm install argocd argo/argo-cd -n argocd --values values.yaml --create-namespace --version 4.9.4 
+helm install argocd argo/argo-cd -n argocd --values values.yaml --create-namespace --version 4.10.6 
 kubectl wait pod -l app.kubernetes.io/instance=argocd --for=condition=Ready -n argocd --timeout=300s
 ```
 

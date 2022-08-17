@@ -1,0 +1,49 @@
+apiVersion: k3d.io/v1alpha3
+kind: Simple
+name: mycluster
+servers: 1
+agents: 1
+kubeAPI:
+  hostIP: 0.0.0.0
+  hostPort: "6443"
+image: rancher/k3s:v1.22.3-k3s1
+ports:
+  - port: 8080:80
+    nodeFilters:
+      - loadbalancer
+registries:
+  create:
+    name: registry.k3d.cloud
+    host: "0.0.0.0"
+    hostPort: "5000"
+options:
+  k3d:
+    wait: true
+    timeout: "60s"
+    disableLoadbalancer: false
+    disableImageVolume: false
+    disableRollback: false
+    loadbalancer:
+      configOverrides:
+        - settings.workerConnections=2048
+  k3s:
+    extraArgs:
+      - arg: --tls-san=test.k3d.cloud
+        nodeFilters:
+          - server:*
+    nodeLabels:
+      - label: role=system
+        nodeFilters:
+          - agent:0
+  kubeconfig:
+    updateDefaultKubeconfig: true 
+    switchCurrentContext: true
+  runtime:
+    gpuRequest: ""
+    serversMemory: "4g"
+    agentsMemory: "1g"
+    labels:
+    - label: role=system
+      nodeFilters:
+      - agent:0
+      - loadbalancer

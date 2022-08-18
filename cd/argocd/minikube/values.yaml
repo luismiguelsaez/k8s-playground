@@ -53,7 +53,8 @@ controller:
   enableStatefulSet: true
   replicas: 2
   env:
-    ARGOCD_CONTROLLER_REPLICAS: "2"
+    - name: ARGOCD_CONTROLLER_REPLICAS
+      value: "2"
   args:
     statusProcessors: "20"
     operationProcessors: "10"

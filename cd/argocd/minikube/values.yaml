@@ -50,8 +50,16 @@ configs:
     managed-by: argocd.argoproj.io
 
 controller:
-  replicas: 2
   enableStatefulSet: true
+  replicas: 2
+  env:
+    ARGOCD_CONTROLLER_REPLICAS: "2"
+  args:
+    statusProcessors: "20"
+    operationProcessors: "10"
+    appResyncPeriod: "15"
+    selfHealTimeout: "15"
+    repoServerTimeoutSeconds: "60"
   nodeSelector: {}
   priorityClassName: ""
   logFormat: json
@@ -60,6 +68,12 @@ controller:
     enable: true
     serviceMonitor:
       enabled: true
+  resources:
+    limits:
+      memory: 500Mi
+    requests:
+      cpu: 500m
+      memory: 500Mi
 
 repoServer:
   nodeSelector: {}

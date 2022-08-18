@@ -106,7 +106,7 @@ vault write auth/kubernetes/config \
 vault write auth/kubernetes/role/vault-test \
      bound_service_account_names=vault-auth \
      bound_service_account_namespaces=default \
-     policies=argocd-dev-rl \
+     policies=github-runner-infra \
      ttl=24h
 ```
 

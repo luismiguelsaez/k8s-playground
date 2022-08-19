@@ -41,8 +41,20 @@ do
             echo "${MOUNT_OUT}"
         fi
 
+        MASTER_IP=$(multipass info ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} | awk '/^IPv4/{print $2}')
+
         echo -ne "\e[37mProvisioning control node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ... \e[0m"
-        PROVISION_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -- bash /scripts/init-master.sh ${K8S_VERS} 2>&1 )
+
+        COMMON_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -- bash /scripts/common.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}" ${MASTER_IP} 2>&1 )
+        if [ $? -eq 0 ]
+        then
+            echo -e "\e[32mOK\e[0m"
+        else
+            echo -e "\e[31mERROR\e[0m"
+            echo "${COMMON_OUT}" | bat -l bash
+        fi
+        
+        PROVISION_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -- bash /scripts/init-master.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}" ${MASTER_IP} 2>&1 )
         if [ $? -eq 0 ]
         then
             echo -e "\e[32mOK\e[0m"
@@ -89,8 +101,20 @@ do
             echo "${MOUNT_OUT}"
         fi
 
+        WORKER_IP=$(multipass info ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} | awk '/^IPv4/{print $2}')
+
         echo -ne "\e[37mProvisioning worker node ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} ... \e[0m"
-        PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- bash /scripts/init-worker.sh ${MASTER_IP}:6443 2>&1)
+
+        COMMON_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -- bash /scripts/common.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}" ${MASTER_IP} 2>&1 )
+        if [ $? -eq 0 ]
+        then
+            echo -e "\e[32mOK\e[0m"
+        else
+            echo -e "\e[31mERROR\e[0m"
+            echo "${COMMON_OUT}" | bat -l bash
+        fi
+
+        PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- bash /scripts/init-worker.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}" ${WORKER_IP} ${MASTER_IP} 2>&1)
         if [ $? -eq 0 ]
         then
             echo -e "\e[32mOK\e[0m"

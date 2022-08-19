@@ -1,5 +1,7 @@
+#!/bin/env bash
+
 set -e
 
-MASTER_URL=${1:-192.168.56.4:6443}
+echo "Initializing worker node [${HOSTNAME}:${NODE_IP}]: ${K8S_VERSION}"
 
-sudo kubeadm join ${MASTER_URL} --token ppozut.y9dh2r1bdowfay3x --discovery-token-unsafe-skip-ca-verification
+kubeadm join ${MASTER_IP}:6443 --token ppozut.y9dh2r1bdowfay3x --discovery-token-unsafe-skip-ca-verification

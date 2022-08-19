@@ -19,63 +19,69 @@ NODES_WORKER_CPUS=1
 NODES_WORKER_MEMORY=1024M
 NODES_WORKER_DISK=20G
 
+RED='\033[0;31m'
+GREEN='\033[0;32m'
+BLUE='\033[0;34m'
+CYAN='\033[0;36m'
+GRAY='\033[0;37m'
+NOCOLOR='\033[0m'
+
 for N in $(seq $CONTROL_NUM)
 do
     NODE_STATUS=$( multipass list | grep ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} )
 
     if [ -z "$NODE_STATUS" ]
     then
-        echo -ne "\e[37mCreating control node \e[34m${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}\e[0m ... \e[0m"
+        echo -ne "Creating control node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}${NOCOLOR} ..."
         LAUNCH_OUT=$( multipass launch ${OS_VERS} -n ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -c ${NODES_CONTROL_CPUS} -m ${NODES_CONTROL_MEMORY} -d ${NODES_CONTROL_DISK} --cloud-init cloud-config.yaml 2>&1 )
         if [ $? -eq 0 ]
         then
-            echo -e "\e[32mOK\e[0m"
+            echo -e "${GREEN}OK${NOCOLOR}"
         else
-            echo -e "\e[31mERROR\e[0m"
+            echo -e "${RED}ERROR${NOCOLOR}"
             echo "${LAUNCH_OUT}"
         fi
 
-        echo -ne "\e[37mMounting scripts in control node ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} ... \e[0m"
+        echo -ne "Mounting scripts in control node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}${NOCOLOR} ..."
         MOUNT_OUT=$( 
             multipass mount scripts ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}:/scripts 2>&1
-            multipass mount manifests ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}:/manifests 2>&1 
         )
         if [ $? -eq 0 ]
         then
-            echo -e "\e[32mOK\e[0m"
+            echo -e "${GREEN}OK${NOCOLOR}"
         else
-            echo -e "\e[31mERROR\e[0m"
+            echo -e "${RED}ERROR${NOCOLOR}"
             echo "${MOUNT_OUT}"
         fi
 
         MASTER_IP=$(multipass info ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} | awk '/^IPv4/{print $2}')
 
-        echo -ne "\e[37mProvisioning control node ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} ... \e[0m"
+        echo -ne "Provisioning control node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}${NOCOLOR} ... "
 
         COMMON_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -- bash /scripts/common.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}" ${MASTER_IP} 2>&1 )
         if [ $? -eq 0 ]
         then
-            echo -e "\e[32mOK\e[0m"
+            echo -e "${GREEN}OK${NOCOLOR}"
         else
-            echo -e "\e[31mERROR\e[0m"
+            echo -e "${RED}ERROR${NOCOLOR}"
             echo "${COMMON_OUT}" | bat -l bash
         fi
         
         PROVISION_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -- bash /scripts/init-master.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}" ${MASTER_IP} 2>&1 )
         if [ $? -eq 0 ]
         then
-            echo -e "\e[32mOK\e[0m"
+            echo -e "${GREEN}OK${NOCOLOR}"
         else
-            echo -e "\e[31mERROR\e[0m"
+            echo -e "${RED}ERROR${NOCOLOR}"
             echo "${PROVISION_OUT}" | bat -l bash
         fi
     else
         if [ "$( echo $NODE_STATUS | awk '{print $2;}' )" == "Stopped" ]
         then
-            echo -e "\e[32mNode ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} already exists. Starting ... \e[32m"
+            echo -e "Node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}${NOCOLOR} already exists. Starting ... "
             multipass start ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} >/dev/null 2>&1
         else
-            echo -e "\e[32mNode ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} already exists\e[0m"
+            echo -e "Node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}${NOCOLOR} already exists"
         fi
     fi
 done
@@ -88,54 +94,54 @@ do
 
     if [ -z "$NODE_STATUS" ]
     then
-        echo -ne "\e[37mCreating worker node \e[35m${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}\e[0m ... \e[0m"
+        echo -ne "Creating worker node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}${NOCOLOR} ... "
         LAUNCH_OUT=$( multipass launch ${OS_VERS} -n ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -c ${NODES_WORKER_CPUS} -m ${NODES_WORKER_MEMORY} -d ${NODES_WORKER_DISK} --cloud-init cloud-config.yaml 2>&1 )
         if [ $? -eq 0 ]
         then
-            echo -e "\e[32mOK\e[0m"
+            echo -e "${GREEN}OK${NOCOLOR}"
         else
-            echo -e "\e[31mERROR\e[0m"
+            echo -e "${RED}ERROR${NOCOLOR}"
             echo "${LAUNCH_OUT}"
         fi
 
-        echo -ne "\e[37mMounting scripts in worker node ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} ... \e[0m"
+        echo -ne "Mounting scripts in worker node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}${NOCOLOR} ... "
         MOUNT_OUT=$( multipass mount scripts ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}:/scripts 2>&1 )
         if [ $? -eq 0 ]
         then
-            echo -e "\e[32mOK\e[0m"
+            echo -e "${GREEN}OK${NOCOLOR}"
         else
-            echo -e "\e[31mERROR\e[0m"
+            echo -e "${RED}ERROR${NOCOLOR}"
             echo "${MOUNT_OUT}"
         fi
 
         WORKER_IP=$(multipass info ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} | awk '/^IPv4/{print $2}')
 
-        echo -ne "\e[37mProvisioning worker node ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} ... \e[0m"
+        echo -ne "Provisioning worker node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}${NOCOLOR} ... "
 
-        COMMON_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -- bash /scripts/common.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}" ${MASTER_IP} 2>&1 )
+        COMMON_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- bash /scripts/common.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}" ${MASTER_IP} 2>&1 )
         if [ $? -eq 0 ]
         then
-            echo -e "\e[32mOK\e[0m"
+            echo -e "${GREEN}OK${NOCOLOR}"
         else
-            echo -e "\e[31mERROR\e[0m"
+            echo -e "${RED}ERROR${NOCOLOR}"
             echo "${COMMON_OUT}" | bat -l bash
         fi
 
         PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- bash /scripts/init-worker.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}" ${WORKER_IP} ${MASTER_IP} 2>&1)
         if [ $? -eq 0 ]
         then
-            echo -e "\e[32mOK\e[0m"
+            echo -e "${GREEN}OK${NOCOLOR}"
         else
-            echo -e "\e[31mERROR\e[0m"
+            echo -e "${RED}ERROR${NOCOLOR}"
             echo "${PROVISION_OUT}" | bat -l bash
         fi
     else
         if [ "$( echo $NODE_STATUS | awk '{print $2;}' )" == "Stopped" ]
         then
-            echo -e "\e[32mNode ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} already exists. Starting ... \e[32m"
+            echo -e "Node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}${NOCOLOR} already exists. Starting ... "
             multipass start ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} >/dev/null 2>&1
         else
-            echo -e "\e[32mNode ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} already exists\e[0m"
+            echo -e "Node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}${NOCOLOR} already exists"
         fi
     fi
 done

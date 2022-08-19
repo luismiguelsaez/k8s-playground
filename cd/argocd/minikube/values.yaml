@@ -62,6 +62,14 @@ controller:
     selfHealTimeout: "15"
     repoServerTimeoutSeconds: "60"
   nodeSelector: {}
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - topologyKey: kubernetes.io/hostname
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/part-of: argocd
+            app.kubernetes.io/component: application-controller
   priorityClassName: ""
   logFormat: json
   logLevel: error
@@ -87,6 +95,14 @@ repoServer:
   logFormat: json
   logLevel: info
   nodeSelector: {}
+  affinity:
+    podAntiAffinity:
+      requiredDuringSchedulingIgnoredDuringExecution:
+      - topologyKey: kubernetes.io/hostname
+        labelSelector:
+          matchLabels:
+            app.kubernetes.io/part-of: argocd
+            app.kubernetes.io/component: repo-server
   serviceAccount:
     create: true
     name: argocd-repo-server

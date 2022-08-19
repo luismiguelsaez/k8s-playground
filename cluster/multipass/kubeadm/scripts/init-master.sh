@@ -2,7 +2,7 @@
 
 set -e
 
-K8S_VERSION=${1:-"1.19.16"}
+K8S_VERSION=${1:-"1.22.13"}
 HOSTNAME=${2:-"default-master"}
 NODE_IP=${3:-"127.0.0.1"}
         
@@ -11,14 +11,14 @@ echo "Initializing master node [${HOSTNAME}:${NODE_IP}]: ${K8S_VERSION}"
 kubeadm config images pull
 kubeadm init --kubernetes-version ${K8S_VERSION} --node-name ${HOSTNAME} --apiserver-cert-extra-sans=${NODE_IP} --token ppozut.y9dh2r1bdowfay3x --pod-network-cidr=10.244.0.0/16 --service-cidr=10.96.0.0/16 --apiserver-advertise-address 192.168.56.4
 
-su - vagrant -c "mkdir ~/.kube"
-cp /etc/kubernetes/admin.conf /home/vagrant/.kube/config
-chown -R $(id -u vagrant).$(id -u vagrant) /home/vagrant/.kube/config
+su - ubuntu -c "mkdir ~/.kube"
+cp /etc/kubernetes/admin.conf /home/ubuntu/.kube/config
+chown -R $(id -u ubuntu).$(id -u ubuntu) /home/ubuntu/.kube/config
 
 # Copy config file to shared folder
-cp /etc/kubernetes/admin.conf /vagrant/kubeadm.conf
+cp /etc/kubernetes/admin.conf /ubuntu/kubeadm.conf
 
-cat << EOF >> /home/vagrant/.bashrc
+cat << EOF >> /home/ubuntu/.bashrc
 # kubectl command setup
 alias k="kubectl"
 source <(kubectl completion bash)
@@ -58,8 +58,8 @@ su - vagrant -c "kubectl patch deploy -n kube-system metrics-server --type=json 
 
 # Install Nginx ingress controller
 
-su - vagrant -c "helm repo add nginx-ingress https://helm.nginx.com/stable"
-su - vagrant -c "helm install nginx-ingress nginx-ingress/nginx-ingress --version 0.12.1 --create-namespace -n nginx"
+su - ubuntu -c "helm repo add nginx-ingress https://helm.nginx.com/stable"
+su - ubuntu -c "helm install nginx-ingress nginx-ingress/nginx-ingress --version 0.12.1 --create-namespace -n nginx"
 
 # Install ArgoCD
 
@@ -67,14 +67,14 @@ export ARGO_PASS="admin"
 ARGO_PASS_ENC="$(htpasswd -nbBC 10 "" ${ARGO_PASS} | tr -d ':\n' | sed 's/$2y/$2a/')"
 export ARGO_PASS_ENC=$(echo ${ARGO_PASS_ENC} | sed 's/\$/\\$/g')
 
-cat << EOF > /home/vagrant/install-argocd.sh
+cat << EOF > /home/ubuntu/install-argocd.sh
 helm repo add argo https://argoproj.github.io/argo-helm
 kubectl create ns argocd
 helm install argocd argo/argo-cd -n argocd --create-namespace --set-string configs.secret.argocdServerAdminPassword="${ARGO_PASS_ENC}"
 #helm install argocd argo/argo-cd -n argocd --create-namespace --set-string configs.secret.argocdServerAdminPassword="${ARGO_PASS_ENC}" --values values-override.yaml
 EOF
 
-chmod +x /home/vagrant/install-argocd.sh
-su - vagrant -c /home/vagrant/install-argocd.sh
-su - vagrant -c "kubectl expose svc argocd-server --type=NodePort --target-port 8080 --name argocd-server-np -n argocd"
+chmod +x /home/ubuntu/install-argocd.sh
+su - ubuntu -c /home/ubuntu/install-argocd.sh
+su - ubuntu -c "kubectl expose svc argocd-server --type=NodePort --target-port 8080 --name argocd-server-np -n argocd"
 

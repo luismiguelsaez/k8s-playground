@@ -2,7 +2,7 @@
 
 set -e
 
-K8S_VERSION=${1:-"1.19.16"}
+K8S_VERSION=${1:-"1.22.13"}
 HOSTNAME=${2:-"default"}
 NODE_IP=${3:-"127.0.0.1"}
 
@@ -28,9 +28,9 @@ sysctl --system
 
 sed -i s/.*${HOSTNAME}.*//g /etc/hosts
 cat << EOF >> /etc/hosts
-192.168.56.4 control-01
-192.168.56.11 worker-01
-192.168.56.12 worker-02
+${NODE_IP} ${HOSTNAME}
+#192.168.56.11 worker-01
+#192.168.56.12 worker-02
 EOF
 
 cat << EOF >/etc/crictl.yaml

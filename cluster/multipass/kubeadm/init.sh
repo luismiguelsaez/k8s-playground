@@ -4,13 +4,20 @@
 CONTROL_NUM=${CONTROL_NUM:-1}
 WORKERS_NUM=${WORKERS_NUM:-2}
 
-OS_VERS=${OS_VERS:-20.04}
-K8S_VERS=${K8S_VERS:-1.19.16}
+OS_VERS=${OS_VERS:-"20.04"}
+K8S_VERS=${K8S_VERS:-"1.22.13"}
 
 NODES_NAME_PREFFIX="kubeadm"
 NODES_CONTROL_NAME_PREFFIX="control"
 NODES_WORKERS_NAME_PREFFIX="worker"
 
+NODES_CONTROL_CPUS=2
+NODES_CONTROL_MEMORY=2048M
+NODES_CONTROL_DISK=20G
+
+NODES_WORKER_CPUS=1
+NODES_WORKER_MEMORY=1024M
+NODES_WORKER_DISK=20G
 
 for N in $(seq $CONTROL_NUM)
 do
@@ -19,7 +26,7 @@ do
     if [ -z "$NODE_STATUS" ]
     then
         echo -ne "\e[37mCreating control node \e[34m${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}\e[0m ... \e[0m"
-        LAUNCH_OUT=$( multipass launch ${OS_VERS} -n ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -c 2 -m 2048M  -d 20G --cloud-init cloud-config.yaml 2>&1 )
+        LAUNCH_OUT=$( multipass launch ${OS_VERS} -n ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -c ${NODES_CONTROL_CPUS} -m ${NODES_CONTROL_MEMORY} -d ${NODES_CONTROL_DISK} --cloud-init cloud-config.yaml 2>&1 )
         if [ $? -eq 0 ]
         then
             echo -e "\e[32mOK\e[0m"
@@ -82,7 +89,7 @@ do
     if [ -z "$NODE_STATUS" ]
     then
         echo -ne "\e[37mCreating worker node \e[35m${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}\e[0m ... \e[0m"
-        LAUNCH_OUT=$( multipass launch ${OS_VERS} -n ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -c 1 -m 1024M  -d 20G --cloud-init cloud-config.yaml 2>&1 )
+        LAUNCH_OUT=$( multipass launch ${OS_VERS} -n ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -c ${NODES_WORKER_CPUS} -m ${NODES_WORKER_MEMORY} -d ${NODES_WORKER_DISK} --cloud-init cloud-config.yaml 2>&1 )
         if [ $? -eq 0 ]
         then
             echo -e "\e[32mOK\e[0m"

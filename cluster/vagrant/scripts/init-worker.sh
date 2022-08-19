@@ -2,7 +2,7 @@
 
 set -e
 
-K8S_VERSION=${1:-"1.19.16"}
+K8S_VERSION=${1:-"1.22.13"}
 HOSTNAME=${2:-"default-worker"}
 NODE_IP=${3:-"127.0.0.1"}
 MASTER_IP=${4:-"127.0.0.1"}

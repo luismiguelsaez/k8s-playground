@@ -3,8 +3,8 @@
 CONTROL_NUM=${CONTROL_NUM:-1}
 WORKERS_NUM=${WORKERS_NUM:-2}
 
-OS_VERS=${OS_VERS:-"20.04"}
-K8S_VERS=${K8S_VERS:-"1.19.16"}
+OS_VERS="20.04"
+K8S_VERS="1.22.13"
 
 NODES_NAME_PREFFIX="kubeadm"
 NODES_CONTROL_NAME_PREFFIX="control"
@@ -56,7 +56,7 @@ do
 
         MASTER_IP=$(multipass info ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} | awk '/^IPv4/{print $2}')
 
-        echo -ne "Provisioning control node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}${NOCOLOR} ... "
+        echo -ne "Provisioning control node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}${NOCOLOR} (1/2) ... "
 
         COMMON_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -- sudo bash /scripts/common.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}" ${MASTER_IP} 2>&1 )
         if [ $? -eq 0 ]
@@ -66,6 +66,8 @@ do
             echo -e "${RED}ERROR${NOCOLOR}"
             echo "${COMMON_OUT}" | bat -l bash
         fi
+
+        echo -ne "Provisioning control node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}${NOCOLOR} (2/2) ... "
         
         PROVISION_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N} -- sudo bash /scripts/init-master.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}" ${MASTER_IP} 2>&1 )
         if [ $? -eq 0 ]
@@ -117,7 +119,7 @@ do
 
         WORKER_IP=$(multipass info ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} | awk '/^IPv4/{print $2}')
 
-        echo -ne "Provisioning worker node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}${NOCOLOR} ... "
+        echo -ne "Provisioning worker node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}${NOCOLOR} (1/2) ... "
 
         COMMON_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- sudo bash /scripts/common.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}" ${MASTER_IP} 2>&1 )
         if [ $? -eq 0 ]
@@ -128,7 +130,9 @@ do
             echo "${COMMON_OUT}" | bat -l bash
         fi
 
-        PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- sudo bash /scripts/init-worker.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}" ${WORKER_IP} ${MASTER_IP} 2>&1)
+        echo -ne "Provisioning worker node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}${NOCOLOR} (2/2) ... "
+
+        PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- sudo bash /scripts/init-worker.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}" ${MASTER_IP} ${WORKER_IP} 2>&1)
         if [ $? -eq 0 ]
         then
             echo -e "${GREEN}OK${NOCOLOR}"

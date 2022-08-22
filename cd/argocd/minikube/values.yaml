@@ -149,9 +149,7 @@ server:
     - --insecure
   ingress:
     enabled: true
-    annotations:
-      nginx.ingress.kubernetes.io/ssl-redirect: "false"
-      kubernetes.io/ingress.class: "nginx"
+    annotations: {}
     labels: {}
     hosts:
       - argocd.minikube.cloud
@@ -251,7 +249,7 @@ server:
     scopes: '[email,groups]'
   additionalProjects:
   # Doc: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/project.yaml
-    - name: argocd       # Name for the AppProject object
+    - name: root       # Name for the AppProject object
       namespace: argocd  # Namespace where to create the AppProject object
       additionalLabels: {}
       additionalAnnotations: {}
@@ -274,9 +272,9 @@ server:
       orphanedResources:
         warn: false
   additionalApplications:
-    - name: argocd      # Name for the Application object
+    - name: root      # Name for the Application object
       namespace: argocd # Namespace where to create the Application object
-      project: argocd
+      project: root
       source:
         repoURL: https://github.com/luismiguelsaez/argocd-playground
         targetRevision: main

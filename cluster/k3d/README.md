@@ -12,6 +12,14 @@ k3d cluster create --config k3d.yaml
 kubectl -n kube-system port-forward svc/traefik 8080:80
 ```
 
+## Install ArgoCD
+
+```bash
+helm install argocd argo/argo-cd -n argocd --values ../../cd/argocd/minikube/values.yaml --create-namespace --version 4.10.6
+
+kubectl port-forward svc/argocd-cicd-main 8080:80 -n argocd
+```
+
 ## Vault/k8s auth configuration
 
 ### Create service account

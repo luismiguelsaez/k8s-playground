@@ -1,8 +1,8 @@
 apiVersion: k3d.io/v1alpha3
 kind: Simple
-name: mycluster
+name: testing-1.22.3
 servers: 1
-agents: 1
+agents: 2
 kubeAPI:
   hostIP: 0.0.0.0
   hostPort: "6443"
@@ -34,7 +34,7 @@ options:
     nodeLabels:
       - label: role=system
         nodeFilters:
-          - agent:0
+          - agent:*
   kubeconfig:
     updateDefaultKubeconfig: true 
     switchCurrentContext: true
@@ -45,5 +45,5 @@ options:
     labels:
     - label: role=system
       nodeFilters:
-      - agent:0
+      - agent:*
       - loadbalancer

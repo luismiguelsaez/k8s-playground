@@ -2,7 +2,7 @@ apiVersion: k3d.io/v1alpha3
 kind: Simple
 name: testing-1.22.3
 servers: 1
-agents: 2
+agents: 3
 kubeAPI:
   hostIP: 0.0.0.0
   hostPort: "6443"
@@ -40,8 +40,8 @@ options:
     switchCurrentContext: true
   runtime:
     gpuRequest: ""
-    serversMemory: "4g"
-    agentsMemory: "1g"
+    serversMemory: "1g"
+    agentsMemory: "3g"
     labels:
     - label: role=system
       nodeFilters:

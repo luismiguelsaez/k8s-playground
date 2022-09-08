@@ -23,3 +23,8 @@ helm upgrade --install argocd argo/argo-cd -n argocd --values cd/argocd/minikube
 
 kubectl port-forward svc/argocd-cicd-main 8080:80 -n argocd
 ```
+
+## Minikube cluster bootstrap
+```bash
+minikube start --kubernetes-version=1.22.3 --driver=docker --nodes=3 --cpus max --memory=2048m --cni cilium --container-runtime=containerd --addons=ingress
+```

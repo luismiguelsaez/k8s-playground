@@ -52,9 +52,6 @@ configs:
 controller:
   enableStatefulSet: true
   replicas: 1
-  env:
-    - name: ARGOCD_CONTROLLER_REPLICAS
-      value: "1"
   args:
     statusProcessors: "20"
     operationProcessors: "10"
@@ -247,12 +244,19 @@ server:
       g, luismiguel.saez@umbrellacorp.com, role:admin
     policy.default: role:readonly
     scopes: '[email,groups]'
-  additionalProjects:
-  # Doc: https://github.com/argoproj/argo-cd/blob/master/docs/operator-manual/project.yaml
-    - name: root       # Name for the AppProject object
-      namespace: argocd  # Namespace where to create the AppProject object
-      additionalLabels: {}
-      additionalAnnotations: {}
+
+extraObjects:
+  # App-in-apps root project
+  - apiVersion: argoproj.io/v1alpha1
+    kind: AppProject
+    metadata:
+      name: root
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+      labels:
+        name: root
+    spec:
       description: Root project
       sourceRepos:
       - '*'
@@ -271,9 +275,17 @@ server:
         kind: '*'
       orphanedResources:
         warn: false
-  additionalApplications:
-    - name: root      # Name for the Application object
-      namespace: argocd # Namespace where to create the Application object
+  # App-in-apps root application
+  - apiVersion: argoproj.io/v1alpha1
+    kind: Application
+    metadata:
+      name: root
+      namespace: argocd
+      finalizers:
+        - resources-finalizer.argocd.argoproj.io
+      labels:
+        name: root
+    spec:
       project: root
       source:
         repoURL: https://github.com/luismiguelsaez/argocd-playground
@@ -287,14 +299,12 @@ server:
           selfHeal: true
           prune: false
           allowEmpty: false
-      retry:
-        limit: 5
-        backoff:
-          duration: 5s
-          factor: 2
-          maxDuration: 10m
-
-extraObjects:
+        retry:
+          limit: 5
+          backoff:
+            duration: 5s
+            factor: 2
+            maxDuration: 10m
   # Crafted secret for git-ssh credentials, because secrets created from `credentialTemplates` are not working
   - apiVersion: v1
     kind: Secret

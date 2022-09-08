@@ -1,0 +1,46 @@
+---
+
+projects:
+  - name: root
+    namespace: argocd
+    additionalLabels: {}
+    additionalAnnotations: {}
+    description: Root project
+    sourceRepos:
+    - '*'
+    destinations:
+    - namespace: argocd
+      server: https://kubernetes.default.svc
+    - namespace: kube-system
+      server: https://kubernetes.default.svc
+    namespaceResourceWhitelist:
+    - group: '*'
+      kind: '*'
+    clusterResourceWhitelist:
+    - group: '*'
+      kind: '*'
+    orphanedResources:
+      warn: false
+
+applications:
+  - name: root
+    namespace: argocd
+    project: root
+    source:
+      repoURL: https://github.com/luismiguelsaez/argocd-playground
+      targetRevision: main
+      path: overlays/minikube 
+    destination:
+      server: https://kubernetes.default.svc
+      namespace: argocd
+    syncPolicy:
+      automated:
+        selfHeal: true
+        prune: false
+        allowEmpty: false
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 10m

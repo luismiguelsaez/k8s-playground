@@ -15,7 +15,8 @@
 ## Bootstrap ArgoCD
 
 ```bash
-helm upgrade --install argocd argo/argo-cd -n argocd --values values.yaml --create-namespace --version 4.10.6 --wait
+helm upgrade --install argocd argo/argo-cd -n argocd --values values-server-5.x.yaml --create-namespace --version 5.4.2 --wait
+helm upgrade --install argocd-apps argo/argocd-apps -n argocd --values values-apps-5.x.yaml --version 0.0.1 --wait
 ```
 
 ## Connecto to ArgoCD UI

@@ -245,6 +245,7 @@ server:
     admin.enabled: "true"
     policy.csv: |
       g, luismiguel.saez@umbrellacorp.com, role:admin
+      p, role:myrole, exec, create, */*, allow
     policy.default: role:readonly
     scopes: '[email,groups]'
   additionalProjects:

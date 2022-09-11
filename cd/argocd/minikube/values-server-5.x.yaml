@@ -168,6 +168,7 @@ server:
   config:
     url: "https://argocd.minikube.cloud"
     ui.bannercontent: "Welcome to Minikube ArgoCD!"
+    exec.enabled: true
     resource.customizations.useOpenLibs.argoproj.io_Application: "true"
     resource.customizations.health.argoproj.io_Application: |
       hs = {}

@@ -1,0 +1,41 @@
+apiVersion: constraints.gatekeeper.sh/v1beta1
+kind: K8sPSPHostFilesystem
+metadata:
+  name: psp-host-filesystem
+spec:
+  match:
+    labelSelector:
+      matchExpressions:
+        - key: app
+          operator: In
+          values:
+            - filebeat-filebeat
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+            - falco
+    kinds:
+      - apiGroups: [""]
+        kinds: ["Pod"]
+    scope: Namespaced
+    excludedNamespaces: []
+  parameters:
+    allowedHostPaths:
+      - pathPrefix: /var/lib/filebeat
+        readOnly: false
+      - pathPrefix: /var/lib/docker/containers
+        readOnly: true
+      - pathPrefix: /var/log
+        readOnly: true
+      - pathPrefix: /var/run/docker.sock
+        readOnly: false
+      - pathPrefix: /dev
+        readOnly: false
+      - pathPrefix: /etc
+        readOnly: false
+      - pathPrefix: /usr
+        readOnly: false
+      - pathPrefix: /lib/modules
+        readOnly: false
+      - pathPrefix: /boot
+        readOnly: false

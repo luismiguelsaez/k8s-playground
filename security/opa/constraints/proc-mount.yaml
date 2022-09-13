@@ -1,14 +1,14 @@
 apiVersion: constraints.gatekeeper.sh/v1beta1
-kind: K8sAllowedRepos
+kind: K8sPSPProcMount
 metadata:
-  name: allowed-repos
+  name: psp-proc-mount
 spec:
   match:
     kinds:
       - apiGroups: [""]
         kinds: ["Pod"]
-    namespaces:
-      - lok
+    excludedNamespaces:
+      - kube-system
+      - monitoring
   parameters:
-    repos:
-      - reg.lokalise.work
+    exemptImages: []

@@ -4,5 +4,10 @@ kind: Kustomization
 resources:
   - privileged-container.yaml
   - privilege-escalation.yaml
+  - host-filesystem.yaml
   - allowed-repos.yaml
   - container-requests.yaml
+  - container-limits.yaml
+  - container-capabilities.yaml
+  - required-probes.yaml
+  - proc-mount.yaml

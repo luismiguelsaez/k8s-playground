@@ -4,8 +4,13 @@ metadata:
   name: psp-privileged-container
 spec:
   match:
+    labelSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: In
+          values:
+            - falco
     kinds:
       - apiGroups: [""]
         kinds: ["Pod"]
-    excludedNamespaces:
-      - kube-system
+    excludedNamespaces: []

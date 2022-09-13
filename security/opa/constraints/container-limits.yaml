@@ -1,7 +1,7 @@
 apiVersion: constraints.gatekeeper.sh/v1beta1
-kind: K8sAllowedRepos
+kind: K8sContainerLimits
 metadata:
-  name: allowed-repos
+  name: container-limits
 spec:
   match:
     kinds:
@@ -10,5 +10,5 @@ spec:
     namespaces:
       - lok
   parameters:
-    repos:
-      - reg.lokalise.work
+    memory: "1024Mi"
+    exemptImages: []

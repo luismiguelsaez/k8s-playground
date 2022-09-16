@@ -6,6 +6,10 @@ spec:
   match:
     labelSelector:
       matchExpressions:
+        - key: k8s-app
+          operator: NotIn
+          values:
+            - cilium
         - key: app.kubernetes.io/name
           operator: NotIn
           values:

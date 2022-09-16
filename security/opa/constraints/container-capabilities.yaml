@@ -15,13 +15,13 @@ spec:
           operator: NotIn
           values:
             - cilium
-            - cilium-node-init
             - kube-dns
         - key: app
           operator: NotIn
           values:
             - gatekeeper
             - nginx-ingress-nginx-ingress
+            - cilium-node-init
     kinds:
       - apiGroups: [""]
         kinds:

@@ -6,14 +6,39 @@ spec:
   match:
     labelSelector:
       matchExpressions:
+        - key: app.kubernetes.io/instance
+          operator: NotIn
+          values:
+            - argocd
+        - key: io.cilium/app
+          operator: NotIn
+          values:
+            - operator
+        - key: k8s-app
+          operator: NotIn
+          values:
+            - cilium
+            - kube-proxy
+            - hubble-relay
+            - hubble-ui
         - key: app.kubernetes.io/name
           operator: NotIn
           values:
             - falco
+            - cluster-autoscaler
+            - grafana
+            - kube-state-metrics
+            - karpenter
+            - external-dns
         - key: app
           operator: NotIn
           values:
             - filebeat-filebeat
+            - ebs-csi-controller
+            - ebs-csi-node
+            - cilium-node-init
+            - cilium-operator
+            - prometheus-node-exporter
         - key: app
           operator: NotIn
           values:

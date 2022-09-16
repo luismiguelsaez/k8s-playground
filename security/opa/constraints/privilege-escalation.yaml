@@ -4,10 +4,30 @@ metadata:
   name: psp-privilege-escalation
 spec:
   match:
+    labelSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: NotIn
+          values:
+            - falco
+        - key: app
+          operator: NotIn
+          values:
+            - filebeat-filebeat
+        - key: app
+          operator: NotIn
+          values:
+            - nginx-ingress-nginx-ingress
     kinds:
       - apiGroups: [""]
-        kinds: ["Pod"]
-    excludedNamespaces:
-      - kube-system
+        kinds: 
+          - Pod
+          - DaemonSet
+    excludedNamespaces: []
+      #- kube-system
+      #- argocd
+      #- ingress
+      #- monitoring
+      #- security
   parameters:
     exemptImages: []

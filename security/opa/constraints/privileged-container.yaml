@@ -7,10 +7,20 @@ spec:
     labelSelector:
       matchExpressions:
         - key: app.kubernetes.io/name
-          operator: In
+          operator: NotIn
           values:
             - falco
+        - key: app.kubernetes.io/component
+          operator: NotIn
+          values:
+            - csi-driver
+        - key: k8s-app
+          operator: NotIn
+          values:
+            - kube-proxy
     kinds:
       - apiGroups: [""]
-        kinds: ["Pod"]
+        kinds:
+          - Pod
+          - DaemonSet
     excludedNamespaces: []

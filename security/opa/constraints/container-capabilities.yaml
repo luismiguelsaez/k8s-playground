@@ -4,11 +4,32 @@ metadata:
   name: psp-capabilities
 spec:
   match:
+    labelSelector:
+      matchExpressions:
+        - key: app.kubernetes.io/name
+          operator: NotIn
+          values:
+            - prometheus
+            - alertmanager
+        - key: k8s-app
+          operator: NotIn
+          values:
+            - cilium
+            - cilium-node-init
+            - kube-dns
+        - key: app
+          operator: NotIn
+          values:
+            - gatekeeper
+            - nginx-ingress-nginx-ingress
     kinds:
       - apiGroups: [""]
-        kinds: ["Pod"]
-    excludedNamespaces:
-      - kube-system
+        kinds:
+          - Pod
+          - DaemonSet
+    excludedNamespaces: []
+      #- kube-system
+      #- ingress
   parameters:
     allowedCapabilities: []
     requiredDropCapabilities: []

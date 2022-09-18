@@ -163,7 +163,7 @@ server:
       tag: "v0.1.0"
     contents:
       - name: rollout-extension
-        url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.0/extension.tar
+        url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.1/extension.tar
   configEnabled: true
   config:
     url: "https://argocd.minikube.cloud"
@@ -274,5 +274,5 @@ extraObjects:
   #      #- git:
   #      #    url: https://github.com/argoproj-labs/argocd-example-extension.git
   #      - web:
-  #          url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.0/extension.tar 
+  #          url: https://github.com/argoproj-labs/rollout-extension/releases/download/v0.2.1/extension.tar 
 

@@ -162,13 +162,20 @@ notifications:
         send:
         - app-sync-succeeded
         when: app.status.operationState.phase in ['Succeeded']
+    trigger.on-deploy-succeeded: |
+      - description: Applycation deployment succeeded
+        oncePer: app.status.syncResult.revision and app.metadata.name
+        send:
+        - app-deployed
+        when: app.status.operationState.phase in ['Succeeded'] and 
+        app.status.health.status == 'Healthy'
   subscriptions: {}
   templates:
     template.app-sync-succeeded: |
       slack:
         attachments: |-
           [{
-            "title": "{{.app.metadata.name}}",
+            "title": "{{.app.metadata.name}}@{{.context.environmentName}}",
             "title_link":"{{.context.argocdUrl}}/applications/{{.app.metadata.name}}",
             "color": "#18be52",
             "fields": [
@@ -180,6 +187,16 @@ notifications:
             {
               "title": "Repository",
               "value": "{{.app.spec.source.repoURL}}",
+              "short": true
+            },
+            {
+              "title": "Author",
+              "value": "{{(call .repo.GetCommitMetadata .app.status.sync.revision).Author}}",
+              "short": true
+            },
+            {
+              "title": "Commit message",
+              "value": "{{(call .repo.GetCommitMetadata .app.status.sync.revision).Message}}",
               "short": true
             }
             {{range $index, $c := .app.status.conditions}}

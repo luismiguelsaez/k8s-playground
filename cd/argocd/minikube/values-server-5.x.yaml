@@ -237,7 +237,7 @@ server:
     tls: []
     https: false
   extensions:
-    enable: true
+    enabled: true
     image:
       repository: "ghcr.io/argoproj-labs/argocd-extensions"
       tag: "v0.1.0"

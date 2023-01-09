@@ -203,7 +203,7 @@ iam:
         Resource: '*'
 
   - metadata:
-      name: autoscaler-service
+      name: cluster-autoscaler
       namespace: kube-system
     attachPolicy:
       Version: "2012-10-17"
@@ -217,4 +217,100 @@ iam:
         - "autoscaling:SetDesiredCapacity"
         - "autoscaling:TerminateInstanceInAutoScalingGroup"
         - "ec2:DescribeLaunchTemplateVersions"
+        Resource: '*'
+
+  - metadata:
+      name: karpenter
+      namespace: kube-system
+    attachPolicy:
+      Version: "2012-10-17"
+      Statement:
+      - Effect: Allow
+        Action:
+        - "ec2:CreateFleet"
+        - "ec2:CreateLaunchTemplate"
+        - "ec2:CreateTags"
+        - "ec2:DeleteLaunchTemplate"
+        - "ec2:DescribeAvailabilityZones"
+        - "ec2:DescribeInstances"
+        - "ec2:DescribeInstanceTypeOfferings"
+        - "ec2:DescribeInstanceTypes"
+        - "ec2:DescribeLaunchTemplates"
+        - "ec2:DescribeSecurityGroups"
+        - "ec2:DescribeSpotPriceHistory"
+        - "ec2:DescribeSubnets"
+        - "ec2:RunInstances"
+        - "iam:PassRole"
+        - "pricing:GetProducts"
+        - "ssm:GetParameter"
+        Resource: '*'
+      - Effect: Allow
+        Action:
+        - "ec2:TerminateInstances"
+        Condition:
+          StringLike:
+            ec2:ResourceTag/Name:
+            - "*karpenter*"
+        Resource: '*'
+
+  - metadata:
+      name: external-dns
+      namespace: kube-system
+    attachPolicy:
+      Version: "2012-10-17"
+      Statement:
+      - Effect: Allow
+        Action:
+        - "route53:ChangeResourceRecordSets"
+        Resource:
+        - "arn:aws:route53:::hostedzone/*"
+      - Effect: Allow
+        Action:
+        - "route53:ListHostedZones"
+        - "route53:ListResourceRecordSets"
+        Resource: '*'
+
+  - metadata:
+      name: aws-ebs-csi-driver
+      namespace: kube-system
+    attachPolicy:
+      Version: "2012-10-17"
+      Statement:
+      - Effect: Allow
+        Action:
+        - "ec2:CreateSnapshot"
+        - "ec2:AttachVolume"
+        - "ec2:DetachVolume"
+        - "ec2:ModifyVolume"
+        - "ec2:DescribeAvailabilityZones"
+        - "ec2:DescribeInstances"
+        - "ec2:DescribeSnapshots"
+        - "ec2:DescribeTags"
+        - "ec2:DescribeVolumes"
+        - "ec2:DescribeVolumesModifications"
+        Resource: '*'
+      - Effect: Allow
+        Action:
+        - "ec2:CreateTags"
+        Condition:
+          StringLike:
+            ec2:CreateAction:
+            - "CreateVolume"
+            - "CreateSnapshot"
+        Resource:
+        - "arn:aws:ec2:*:*:volume/*"
+        - "arn:aws:ec2:*:*:snapshot/*"
+      - Effect: Allow
+        Action:
+        - "ec2:DeleteTags"
+        Resource:
+        - "arn:aws:ec2:*:*:volume/*"
+        - "arn:aws:ec2:*:*:snapshot/*"
+      - Effect: Allow
+        Action:
+        - "ec2:CreateVolume"
+        Condition:
+          StringLike:
+            "aws:RequestTag/ebs.csi.aws.com/cluster":
+            - "true"
         Resource: '*'

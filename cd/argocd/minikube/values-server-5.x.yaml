@@ -272,6 +272,15 @@ server:
     url: "https://argocd.minikube.cloud"
     ui.bannercontent: "Welcome to Minikube ArgoCD!"
     exec.enabled: "true"
+    # Fix for problems related to Cilium components like CiliumIdentity
+    # https://docs.cilium.io/en/stable/configuration/argocd-issues/#argo-cd-deletes-customresourcedefinitions
+    resource.exclusions: |
+      - apiGroups:
+          - cilium.io
+        kinds:
+          - CiliumIdentity
+        clusters:
+          - "*"
     resource.customizations.useOpenLibs.argoproj.io_Application: "true"
     resource.customizations.health.argoproj.io_Application: |
       hs = {}

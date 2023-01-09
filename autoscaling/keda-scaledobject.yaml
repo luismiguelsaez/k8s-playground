@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: test
+  name: test
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: test
+  template:
+    metadata:
+      labels:
+        app: test
+    spec:
+      containers:
+      - name: siege
+        image: quay.io/cloud-bulldozer/kube-burner:v0.17.1
+        command: ["siege",  "--concurrent=5", "--benchmark", "--time=6m", "http://vote"]
+        resources:
+          requests:
+            cpu: 100m
+            memory: 64Mi
+          limits:
+            cpu: 1000m
+            memory: 128Mi
+---
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: fss-rollout
+  namespace: fss
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: test
+  pollingInterval: 30
+  cooldownPeriod:  300
+  minReplicaCount: 3
+  maxReplicaCount: 10
+  advanced:
+    restoreToOriginalReplicaCount: true
+  triggers:
+  - type: cpu
+    metadata:
+      type: Utilization
+      value: "85"
+  - type: memory
+    metadata:
+      type: AverageValue
+      value: 64Mi

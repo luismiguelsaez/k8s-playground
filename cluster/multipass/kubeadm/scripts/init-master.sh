@@ -28,15 +28,15 @@ EOF
 # Install tools
 
 ## etcdctl
-curl -sL https://github.com/etcd-io/etcd/releases/download/v3.5.2/etcd-v3.5.2-linux-amd64.tar.gz | tar --transform 's/^etcd-.*linux-amd64//' -xzvf - etcd-v3.5.2-linux-amd64/etcdctl
-mv ./etcdctl /usr/local/bin/
-chmod +x /usr/local/bin/etcdctl
+#curl -sL https://github.com/etcd-io/etcd/releases/download/v3.5.2/etcd-v3.5.2-linux-amd64.tar.gz | tar --transform 's/^etcd-.*linux-amd64//' -xzvf - etcd-v3.5.2-linux-amd64/etcdctl
+#mv ./etcdctl /usr/local/bin/
+#chmod +x /usr/local/bin/etcdctl
 
-## helm
-
-curl -sL https://get.helm.sh/helm-v3.8.0-linux-amd64.tar.gz | tar --transform 's/^linux-amd64//' -xzvf - linux-amd64/helm
-mv ./helm /usr/local/bin/
-chmod +x /usr/local/bin/etcdctl
+## helm#
+#
+#curl -sL https://get.helm.sh/helm-v3.8.0-linux-amd64.tar.gz | tar --transform 's/^linux-amd64//' -xzvf - linux-amd64/helm
+#mv ./helm /usr/local/bin/
+#chmod +x /usr/local/bin/etcdctl
 
 # Cilium networking plutin
 #curl -sL https://get.helm.sh/helm-v3.8.0-linux-amd64.tar.gz | tar -xz linux-amd64/helm
@@ -49,12 +49,12 @@ chmod +x /usr/local/bin/etcdctl
 #kubectl wait pod --for condition=ready --all -n kube-system --timeout=300s
 
 # Calico
-kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml
+su - ubuntu -c "kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml"
 
 # Install metrics server
 #curl -sL https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml | yq 'select(.kind == "Deployment")|.spec.template.spec.containers[0].args += "--kubelet-insecure-tls"'
-kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-kubectl patch deploy -n kube-system metrics-server --type=json --patch='[{"op":"replace","path":"/spec/template/spec/containers/0/args","value":["--cert-dir=/tmp","--secure-port=4443","--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname","--kubelet-use-node-status-port","--metric-resolution=15s","--kubelet-insecure-tls"]}]'
+#kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
+#kubectl patch deploy -n kube-system metrics-server --type=json --patch='[{"op":"replace","path":"/spec/template/spec/containers/0/args","value":["--cert-dir=/tmp","--secure-port=4443","--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname","--kubelet-use-node-status-port","--metric-resolution=15s","--kubelet-insecure-tls"]}]'
 
 # Install Nginx ingress controller
 

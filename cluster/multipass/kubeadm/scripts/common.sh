@@ -65,4 +65,4 @@ systemctl start containerd
 
 systemctl enable kubelet
 
-echo "KUBELET_EXTRA_ARGS='--node-ip=${NODE_IP} --network-plugin=cni'" > /etc/default/kubelet
+echo "KUBELET_EXTRA_ARGS='--node-ip=${NODE_IP}'" > /etc/default/kubelet

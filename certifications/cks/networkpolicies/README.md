@@ -18,12 +18,18 @@ k create deploy nginx-backend -n backend --image nginx:1.20.1 --port 80 --replic
 k expose deploy nginx-backend -n backend --type ClusterIP --port 80
 ```
 
-- Check connectivity
+- Apply frontend policies
+```bash
+k apply -f egress-frontend.yaml -n frontend
+```
+
+- Check connectivity frontend -> backend
 ```bash
 k exec -it -n frontend nginx -- sh -c "curl nginx-backend.backend.svc.cluster.local"
 ```
 
-- Apply backend policy
+- Apply backend policies
 ```bash
 k apply -f ingress-backend.yaml -n backend
+k apply -f egress-backend.yaml -n backend
 ```

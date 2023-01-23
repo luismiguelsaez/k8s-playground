@@ -2,9 +2,11 @@
 
 set -e
 
-K8S_VERSION=${1:-"1.22.13"}
+K8S_VERSION=${1:-"1.24.10"}
 HOSTNAME=${2:-"default"}
 NODE_IP=${3:-"127.0.0.1"}
+
+CONTAINERD_RELEASE="https://github.com/containerd/containerd/releases/download/v1.6.15/containerd-1.6.15-linux-arm64.tar.gz"
 
 echo "Installing K8s packages [${HOSTNAME}:${NODE_IP}]: ${K8S_VERSION}"
 
@@ -43,7 +45,10 @@ EOF
 
 # Install packages
 apt-get update -y
-apt-get install -y apt-transport-https ca-certificates curl apache2-utils
+apt-get install -y apt-transport-https ca-certificates curl apache2-utils gnupg2 software-properties-common
+
+# Fix for containerd by installing 1.6.x version
+curl -sL ${CONTAINERD_RELEASE} -o- | tar -xz --transform 's/bin\///g' -C /usr/bin/
 
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add
 apt-add-repository "deb http://apt.kubernetes.io/ kubernetes-xenial main"

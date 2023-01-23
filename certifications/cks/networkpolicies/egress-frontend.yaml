@@ -1,0 +1,23 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: egress-frontend
+spec:
+  podSelector:
+    matchLabels:
+      app: frontend
+  policyTypes:
+    - Egress
+  egress:
+  - to:
+    - namespaceSelector:
+        matchLabels:
+          kubernetes.io/metadata.name: backend
+    - podSelector:
+        matchLabels:
+          k8s-app: kube-dns
+  - ports:
+    - port: 53
+      protocol: UDP
+    - port: 80
+      protocol: TCP

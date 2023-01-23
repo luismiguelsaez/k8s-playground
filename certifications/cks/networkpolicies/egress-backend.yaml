@@ -1,0 +1,21 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: egress-backend
+spec:
+  podSelector:
+    matchLabels:
+      app: nginx-backend
+  policyTypes:
+    - Egress
+  egress:
+  - to:
+    - ipBlock:
+        cidr: 0.0.0.0/0
+        except:
+          - 8.8.8.8/32
+  - ports:
+    - port: 53
+      protocol: TCP
+    - port: 53
+      protocol: UDP

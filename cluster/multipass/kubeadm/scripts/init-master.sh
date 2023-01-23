@@ -5,7 +5,9 @@ set -e
 K8S_VERSION=${1:-"1.22.13"}
 HOSTNAME=${2:-"default-master"}
 NODE_IP=${3:-"127.0.0.1"}
-        
+
+CILIUM_CLI_URL="https://github.com/cilium/cilium-cli/releases/download/v0.12.12/cilium-linux-arm64.tar.gz"
+
 echo "Initializing master node [${HOSTNAME}:${NODE_IP}]: ${K8S_VERSION}"
 
 kubeadm config images pull
@@ -26,6 +28,11 @@ complete -F __start_kubectl k
 EOF
 
 # Install tools
+
+## Cilium
+
+curl -sL ${CILIUM_CLI_URL} -o- | tar -xz -C /usr/local/bin
+cilium install
 
 ## etcdctl
 #curl -sL https://github.com/etcd-io/etcd/releases/download/v3.5.2/etcd-v3.5.2-linux-amd64.tar.gz | tar --transform 's/^etcd-.*linux-amd64//' -xzvf - etcd-v3.5.2-linux-amd64/etcdctl
@@ -49,7 +56,7 @@ EOF
 #kubectl wait pod --for condition=ready --all -n kube-system --timeout=300s
 
 # Calico
-su - ubuntu -c "kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml"
+#su - ubuntu -c "kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml"
 
 # Install metrics server
 #curl -sL https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml | yq 'select(.kind == "Deployment")|.spec.template.spec.containers[0].args += "--kubelet-insecure-tls"'

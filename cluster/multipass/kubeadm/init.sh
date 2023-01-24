@@ -1,15 +1,16 @@
 #!/usr/bin/env bash
 
 CONTROL_NUM=${CONTROL_NUM:-1}
-WORKERS_NUM=${WORKERS_NUM:-1}
+WORKERS_NUM=${WORKERS_NUM:-2}
 
 OS_VERS="20.04" # multipass find
-K8S_VERS="1.23.16" # https://kubernetes.io/releases/ - try 1.24.10
+K8S_VERS="1.24.10" # https://kubernetes.io/releases/ - try 1.24.10
 
 # Tested versions
 #
-# k8s 1.23.16 - containerd v1.6.15 - works for new provision
-# k8s 1.24.10 - containerd v1.6.15 - works after upgrading master from 1.23.16
+# Ubuntu 20.04.5 - k8s 1.23.16 - containerd v1.6.15 - works for new provision
+# Ubuntu 20.04.5 - k8s 1.24.10 - containerd v1.6.15 - works after upgrading master from 1.23.16
+# Ubuntu 20.04.5 - k8s 1.24.10 - containerd v1.6.15 - works for new provision
 
 
 NODES_NAME_PREFFIX="kubeadm"
@@ -140,7 +141,7 @@ then
 
             echo -ne "Provisioning worker node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}${NOCOLOR} (2/2) ... "
 
-            PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- sudo bash /scripts/init-worker.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}" ${WORKER_IP} ${WORKER_IP} 2>&1)
+            PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- sudo bash /scripts/init-worker.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}" ${MASTER_IP} ${WORKER_IP} 2>&1)
             if [ $? -eq 0 ]
             then
                 echo -e "${GREEN}OK${NOCOLOR}"

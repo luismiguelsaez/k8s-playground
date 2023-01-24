@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 CONTROL_NUM=${CONTROL_NUM:-1}
-WORKERS_NUM=${WORKERS_NUM:-0}
+WORKERS_NUM=${WORKERS_NUM:-1}
 
 OS_VERS="20.04" # multipass find
 K8S_VERS="1.23.16" # https://kubernetes.io/releases/ - try 1.24.10
@@ -129,7 +129,7 @@ then
 
             echo -ne "Provisioning worker node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}${NOCOLOR} (1/2) ... "
 
-            COMMON_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- sudo bash /scripts/common.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}" ${MASTER_IP} 2>&1 )
+            COMMON_OUT=$( multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- sudo bash /scripts/common.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_CONTROL_NAME_PREFFIX}-${N}" ${WORKER_IP} 2>&1 )
             if [ $? -eq 0 ]
             then
                 echo -e "${GREEN}OK${NOCOLOR}"
@@ -140,7 +140,7 @@ then
 
             echo -ne "Provisioning worker node ${BLUE}${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}${NOCOLOR} (2/2) ... "
 
-            PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- sudo bash /scripts/init-worker.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}" ${MASTER_IP} ${WORKER_IP} 2>&1)
+            PROVISION_OUT=$(multipass exec ${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N} -- sudo bash /scripts/init-worker.sh ${K8S_VERS} "${NODES_NAME_PREFFIX}-${NODES_WORKERS_NAME_PREFFIX}-${N}" ${WORKER_IP} ${WORKER_IP} 2>&1)
             if [ $? -eq 0 ]
             then
                 echo -e "${GREEN}OK${NOCOLOR}"

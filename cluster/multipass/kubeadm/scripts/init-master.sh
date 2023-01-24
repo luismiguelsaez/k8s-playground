@@ -31,7 +31,7 @@ EOF
 
 ## Cilium
 curl -sL ${CILIUM_CLI_URL} -o- | tar -xz -C /usr/local/bin
-cilium install
+#cilium install
 
 ## etcdctl
 #curl -sL https://github.com/etcd-io/etcd/releases/download/v3.5.2/etcd-v3.5.2-linux-amd64.tar.gz | tar --transform 's/^etcd-.*linux-amd64//' -xzvf - etcd-v3.5.2-linux-amd64/etcdctl

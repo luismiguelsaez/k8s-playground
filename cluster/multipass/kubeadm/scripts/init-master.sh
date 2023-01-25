@@ -29,62 +29,17 @@ EOF
 
 # Install tools
 
-## Cilium
+## cilium
 curl -sL ${CILIUM_CLI_URL} -o- | tar -xz -C /usr/local/bin
-#cilium install
 
 ## etcdctl
-#curl -sL https://github.com/etcd-io/etcd/releases/download/v3.5.2/etcd-v3.5.2-linux-amd64.tar.gz | tar --transform 's/^etcd-.*linux-amd64//' -xzvf - etcd-v3.5.2-linux-amd64/etcdctl
-#mv ./etcdctl /usr/local/bin/
-#chmod +x /usr/local/bin/etcdctl
 
 curl -sL https://github.com/etcd-io/etcd/releases/download/v3.5.7/etcd-v3.5.7-linux-arm64.tar.gz | tar -xz -C /tmp/
 cp /tmp/etcd-*-arm64/etcdctl /usr/local/bin
 rm -rf /tmp/etcd-*-arm64
 
-## helm#
-#
-#curl -sL https://get.helm.sh/helm-v3.8.0-linux-amd64.tar.gz | tar --transform 's/^linux-amd64//' -xzvf - linux-amd64/helm
-#mv ./helm /usr/local/bin/
-#chmod +x /usr/local/bin/etcdctl
+## helm
 
-# Cilium networking plutin
-#curl -sL https://get.helm.sh/helm-v3.8.0-linux-amd64.tar.gz | tar -xz linux-amd64/helm
-#linux-amd64/helm repo add cilium https://helm.cilium.io/
-#linux-amd64/helm install cilium cilium/cilium --version 1.11.1 --namespace kube-system --wait
-
-# Flannel networking plugin
-#kubectl apply -f https://github.com/coreos/flannel/raw/master/Documentation/kube-flannel.yml
-#kubectl create -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel-rbac.yml
-#kubectl wait pod --for condition=ready --all -n kube-system --timeout=300s
-
-# Calico
-#su - ubuntu -c "kubectl apply -f https://docs.projectcalico.org/manifests/calico.yaml"
-
-# Install metrics server
-#curl -sL https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml | yq 'select(.kind == "Deployment")|.spec.template.spec.containers[0].args += "--kubelet-insecure-tls"'
-#kubectl apply -f https://github.com/kubernetes-sigs/metrics-server/releases/latest/download/components.yaml
-#kubectl patch deploy -n kube-system metrics-server --type=json --patch='[{"op":"replace","path":"/spec/template/spec/containers/0/args","value":["--cert-dir=/tmp","--secure-port=4443","--kubelet-preferred-address-types=InternalIP,ExternalIP,Hostname","--kubelet-use-node-status-port","--metric-resolution=15s","--kubelet-insecure-tls"]}]'
-
-# Install Nginx ingress controller
-
-#helm repo add nginx-ingress https://helm.nginx.com/stable
-#helm install nginx-ingress nginx-ingress/nginx-ingress --version 0.12.1 --create-namespace -n nginx
-
-# Install ArgoCD
-
-#export ARGO_PASS="admin"
-#ARGO_PASS_ENC="$(htpasswd -nbBC 10 "" ${ARGO_PASS} | tr -d ':\n' | sed 's/$2y/$2a/')"
-#export ARGO_PASS_ENC=$(echo ${ARGO_PASS_ENC} | sed 's/\$/\\$/g')
-
-#cat << EOF > /home/ubuntu/install-argocd.sh
-#helm repo add argo https://argoproj.github.io/argo-helm
-#kubectl create ns argocd
-#helm install argocd argo/argo-cd -n argocd --create-namespace --set-string configs.secret.argocdServerAdminPassword="${ARGO_PASS_ENC}"
-##helm install argocd argo/argo-cd -n argocd --create-namespace --set-string configs.secret.argocdServerAdminPassword="${ARGO_PASS_ENC}" --values values-override.yaml
-#EOF
-
-#chmod +x /home/ubuntu/install-argocd.sh
-#su - ubuntu -c /home/ubuntu/install-argocd.sh
-#su - ubuntu -c "kubectl expose svc argocd-server --type=NodePort --target-port 8080 --name argocd-server-np -n argocd"
-
+curl -sL https://get.helm.sh/helm-v3.8.0-linux-arm64.tar.gz | tar -xz -C /tmp
+mv /tmp/linux-arm64/helm /usr/local/bin
+rm -rf /tmp/linux-arm64

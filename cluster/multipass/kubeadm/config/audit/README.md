@@ -63,3 +63,8 @@
   - Check logs
     - `/var/log/pods/kube-system_kube-apiserver-*`
     - `/var/log/containers/kube-apiserver-*`
+
+- Check audit logs
+  ```bash
+  sudo cat /var/log/kubernetes/audit/audit.log | jq -r '[.user.username,.verb,.objectRef.name]|@csv'
+  ```

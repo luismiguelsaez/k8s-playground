@@ -66,5 +66,5 @@
 
 - Check audit logs
   ```bash
-  sudo cat /var/log/kubernetes/audit/audit.log | jq -r '[.user.username,.verb,.objectRef.name]|@csv'
+  sudo cat /var/log/kubernetes/audit/audit.log | jq -r '[.user.username,.verb,.objectRef.namespace,.objectRef.resource,.objectRef.name]|@csv'
   ```

@@ -4,6 +4,7 @@ omitStages:
   - "RequestReceived"
 rules:
   - level: RequestResponse
+    verbs: ["get","create","delete"]
     resources:
     - group: ""
       resources: ["pods","secrets"]

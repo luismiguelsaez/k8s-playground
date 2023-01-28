@@ -1,4 +1,10 @@
 
+# Image scan
+
+```bash
+trivy image ubuntu:20.04 --severity HIGH,CRITICAL
+```
+
 # TLS setup
 
 ```bash

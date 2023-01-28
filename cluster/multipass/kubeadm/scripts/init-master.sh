@@ -43,3 +43,8 @@ rm -rf /tmp/etcd-*-arm64
 curl -sL https://get.helm.sh/helm-v3.8.0-linux-arm64.tar.gz | tar -xz -C /tmp
 mv /tmp/linux-arm64/helm /usr/local/bin
 rm -rf /tmp/linux-arm64
+
+## trivy
+
+curl -sL https://github.com/aquasecurity/trivy/releases/download/v0.36.1/trivy_0.36.1_Linux-ARM64.tar.gz | tar -xz -C /tmp
+mv /tmp/trivy /usr/local/bin

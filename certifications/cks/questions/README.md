@@ -5,6 +5,23 @@
 trivy image ubuntu:20.04 --severity HIGH,CRITICAL
 ```
 
+# Configure ImagepolicyWebwook ( https://kubernetes.io/docs/reference/access-authn-authz/admission-controllers/#imagepolicywebhook )
+
+- Create config files
+```bash
+mkdir -p /etc/kubernetes/admission
+```
+
+- Configure apiserver
+```yaml
+spec:
+  containers:
+  - command:
+    - kube-apiserver
+    - --enable-admission-plugins=NodeRestriction,ImagePolicyWebhook
+    - --admission-control-config-file=
+```
+
 # TLS setup
 
 ```bash

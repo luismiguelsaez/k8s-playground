@@ -1,0 +1,185 @@
+datasources:
+  datasources.yaml:
+    apiVersion: 1
+    datasources:
+    - name: Prometheus
+      type: prometheus
+      url: http://prometheus-server-server
+      access: proxy
+      isDefault: true
+
+dashboards:
+  default:
+    cpu-monitoring:
+      json: |
+        {
+          "annotations": {
+            "list": [
+              {
+                "builtIn": 1,
+                "datasource": {
+                  "type": "grafana",
+                  "uid": "-- Grafana --"
+                },
+                "enable": true,
+                "hide": true,
+                "iconColor": "rgba(0, 211, 255, 1)",
+                "name": "Annotations & Alerts",
+                "target": {
+                  "limit": 100,
+                  "matchAny": false,
+                  "tags": [],
+                  "type": "dashboard"
+                },
+                "type": "dashboard"
+              }
+            ]
+          },
+          "editable": true,
+          "fiscalYearStartMonth": 0,
+          "graphTooltip": 0,
+          "id": 1,
+          "links": [],
+          "liveNow": false,
+          "panels": [
+            {
+              "datasource": {
+                "type": "prometheus",
+                "uid": "PBFA97CFB590B2093"
+              },
+              "fieldConfig": {
+                "defaults": {
+                  "color": {
+                    "mode": "palette-classic"
+                  },
+                  "custom": {
+                    "axisCenteredZero": false,
+                    "axisColorMode": "text",
+                    "axisLabel": "",
+                    "axisPlacement": "auto",
+                    "barAlignment": 0,
+                    "drawStyle": "line",
+                    "fillOpacity": 0,
+                    "gradientMode": "none",
+                    "hideFrom": {
+                      "legend": false,
+                      "tooltip": false,
+                      "viz": false
+                    },
+                    "lineInterpolation": "linear",
+                    "lineWidth": 1,
+                    "pointSize": 5,
+                    "scaleDistribution": {
+                      "type": "linear"
+                    },
+                    "showPoints": "auto",
+                    "spanNulls": false,
+                    "stacking": {
+                      "group": "A",
+                      "mode": "none"
+                    },
+                    "thresholdsStyle": {
+                      "mode": "off"
+                    }
+                  },
+                  "mappings": [],
+                  "thresholds": {
+                    "mode": "absolute",
+                    "steps": [
+                      {
+                        "color": "green",
+                        "value": null
+                      },
+                      {
+                        "color": "red",
+                        "value": 80
+                      }
+                    ]
+                  }
+                },
+                "overrides": []
+              },
+              "gridPos": {
+                "h": 8,
+                "w": 12,
+                "x": 0,
+                "y": 0
+              },
+              "id": 1,
+              "options": {
+                "legend": {
+                  "calcs": [],
+                  "displayMode": "list",
+                  "placement": "bottom",
+                  "showLegend": true
+                },
+                "tooltip": {
+                  "mode": "single",
+                  "sort": "none"
+                }
+              },
+              "targets": [
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "PBFA97CFB590B2093"
+                  },
+                  "editorMode": "code",
+                  "expr": "avg by (pod) (kube_pod_container_resource_limits{pod=\"resources-test\",resource=\"cpu\"})",
+                  "hide": false,
+                  "instant": true,
+                  "key": "Q-7b6efe32-cf68-4bc7-99a8-187e42c1ea44-0",
+                  "legendFormat": "__auto",
+                  "range": true,
+                  "refId": "A"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "PBFA97CFB590B2093"
+                  },
+                  "editorMode": "code",
+                  "expr": "avg by (pod) (rate(container_cpu_usage_seconds_total{pod=\"resources-test\"}[5m]))",
+                  "hide": false,
+                  "instant": true,
+                  "key": "Q-35aa0c03-3b6b-41ff-9060-ab92ba4ede3c-1",
+                  "legendFormat": "__auto",
+                  "range": true,
+                  "refId": "B"
+                },
+                {
+                  "datasource": {
+                    "type": "prometheus",
+                    "uid": "PBFA97CFB590B2093"
+                  },
+                  "editorMode": "code",
+                  "expr": "avg by (pod) (rate(container_cpu_cfs_throttled_seconds_total{pod=\"resources-test\"}[5m]))",
+                  "hide": true,
+                  "instant": true,
+                  "key": "Q-126f08a6-3ce1-4805-992b-6116fd7e304d-2",
+                  "legendFormat": "__auto",
+                  "range": true,
+                  "refId": "C"
+                }
+              ],
+              "title": "CPU throttling",
+              "type": "timeseries"
+            }
+          ],
+          "schemaVersion": 37,
+          "style": "dark",
+          "tags": [],
+          "templating": {
+            "list": []
+          },
+          "time": {
+            "from": "now-6h",
+            "to": "now"
+          },
+          "timepicker": {},
+          "timezone": "",
+          "title": "Kubernetes pods",
+          "uid": "2jiKZ-A4z",
+          "version": 1,
+          "weekStart": ""
+        }

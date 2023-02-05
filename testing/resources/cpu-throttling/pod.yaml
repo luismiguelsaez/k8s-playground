@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Pod
+metadata:
+  labels:
+    run: resources-test
+  name: resources-test
+spec:
+  containers:
+  - image: gcr.io/kubernetes-e2e-test-images/resource-consumer:1.5
+    name: resources-test
+    resources:
+      limits:
+        cpu: 100m
+        memory: 100Mi
+      requests:
+        cpu: 50m
+        memory: 50Mi
+  restartPolicy: Always

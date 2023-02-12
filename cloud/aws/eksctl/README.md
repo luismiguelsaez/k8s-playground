@@ -23,25 +23,18 @@ eksctl create cluster --config-file cloud/aws/eksctl/single-ng-cluster.yaml
 eksctl create nodegroup --config-file cloud/aws/eksctl/single-ng-cluster.yaml --include='monitoring'
 ```
 
-## Ingress configuration
+### Install infra components
 
-### AWS [load balancer controller](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html)
+- [load balancer controller](https://docs.aws.amazon.com/eks/latest/userguide/aws-load-balancer-controller.html)
+- [external-dns](https://github.com/kubernetes-sigs/external-dns)
 
-- Github repo: https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/deploy/installation.md
-- eksctl docs: https://www.eksworkshop.com/beginner/180_fargate/prerequisites-for-alb/
-- Annotations ( https://kubernetes-sigs.github.io/aws-load-balancer-controller/v2.4/ )
-  - Service: https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/guide/service/annotations.md
-  - Ingress: https://github.com/kubernetes-sigs/aws-load-balancer-controller/blob/main/docs/guide/ingress/annotations.md
+```
+helm repo add external-dns https://kubernetes-sigs.github.io/external-dns
+helm repo add eks https://aws.github.io/eks-charts
 
-- Install controller
-  ```bash
-  helm repo add eks https://aws.github.io/eks-charts
-  helm install aws-load-balancer-controller eks/aws-load-balancer-controller -n kube-system --set clusterName=single-ng-lb-controller --set serviceAccount.create=false --set serviceAccount.name=aws-load-balancer-controller --set region=eu-central-1 --set vpcId=vpc-047f2fc64d0ea743f
-  ```
-
-### K8s external controller
-
-To manage DNS resolution, [external-dns](https://github.com/kubernetes-sigs/external-dns) is needed
+helm upgrade --install -n kube-system --create-namespace external-dns external-dns/external-dns -f values/external-dns.yaml
+helm upgrade --install -n kube-system --create-namespace aws-load-balancer-controller eks/aws-load-balancer-controller -f values/aws-load-balancer-controller.yaml
+```
 
 ### Nginx
 

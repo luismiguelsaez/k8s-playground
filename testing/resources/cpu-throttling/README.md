@@ -6,9 +6,9 @@
 helm repo add prometheus-community https://prometheus-community.github.io/helm-charts
 helm repo add grafana https://grafana.github.io/helm-charts
 
-helm upgrade --install prometheus-server prometheus-community/prometheus --version 19.3.3
-helm upgrade --install prometheus-crds prometheus-community/prometheus-operator-crds --version 1.1.0
-helm upgrade --install grafana-server grafana/grafana --version 6.50.7 -f grafana-values.yaml
+helm upgrade --install --create-namespace -n monitoring prometheus-server prometheus-community/prometheus --version 19.3.3
+helm upgrade --install --create-namespace -n monitoring prometheus-crds prometheus-community/prometheus-operator-crds --version 1.1.0
+helm upgrade --install --create-namespace -n monitoring grafana-server grafana/grafana --version 6.50.7 -f grafana-values.yaml
 
 k apply -f pod.yaml -n default
 

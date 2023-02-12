@@ -1,0 +1,35 @@
+---
+
+provider: aws
+sources:
+  - service
+  - ingress
+policy: upsert-only
+extraArgs:
+  - --aws-zone-type=private
+  - --events
+  - --service-type-filter=LoadBalancer
+  - --annotation-filter="kubernetes.io/dns-type in (private)"
+deploymentStrategy:
+  type: Recreate
+podLabels:
+  infra/app: external-dns
+  infra/component: controller
+nodeSelector: {}
+affinity: {}
+serviceAccount:
+  create: false
+  name: external-dns
+logLevel: info
+logFormat: json
+resources:
+  limits:
+    memory: 256Mi
+  requests:
+    cpu: 100m
+    memory: 256Mi
+serviceMonitor:
+  enabled: false
+  additionalLabels: {}
+  interval: 1m
+  scrapeTimeout: 10s

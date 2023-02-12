@@ -1,0 +1,23 @@
+---
+
+podLabels:
+  infra/app: aws-load-balancer-controller
+  infra/component: controller
+nodeSelector: {}
+affinity: {}
+clusterName: lok-k8s-main
+serviceAccount:
+  create: false
+  name: aws-load-balancer-controller
+region: eu-central-1
+resources:
+  limits:
+    memory: 300Mi
+  requests:
+    cpu: 100m
+    memory: 300Mi
+serviceMonitor:
+  enabled: false
+  additionalLabels: {}
+  interval: 1m
+  namespace:

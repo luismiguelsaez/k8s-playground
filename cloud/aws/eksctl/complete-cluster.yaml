@@ -7,25 +7,16 @@ metadata:
   version: "1.24"
   region: eu-central-1
 
-availabilityZones: ["eu-central-1a", "eu-central-1b", "eu-central-1c"]
+availabilityZones: [eu-central-1a, eu-central-1b, eu-central-1c]
 
 vpc:
   cidr: 172.24.0.0/16
+  nat:
+    gateway: Single
   autoAllocateIPv6: false
   clusterEndpoints:
     publicAccess: true
     privateAccess: true
-  #subnets:
-  #  public:
-  #    public-one:
-  #      cidr: 172.24.1.0/24
-  #    public-two:
-  #      cidr: 172.24.3.0/24
-  #  private:
-  #    private-one:
-  #      cidr: 172.24.2.0/24
-  #    private-two:
-  #      cidr: 172.24.4.0/24
 
 nodeGroups:
   - name: ng-frontend
@@ -44,314 +35,83 @@ nodeGroups:
     iam:
       withAddonPolicies:
         autoScaler: true
-  - name: ng-backend
-    instanceType: t3a.medium
-    minSize: 2
-    maxSize: 5
-    desiredCapacity: 2
-    amiFamily: AmazonLinux2
-    privateNetworking: true
-    disableIMDSv1: true
-    labels:
-      nodegroup-type: backend
-    iam:
-      withAddonPolicies:
-        autoScaler: true
-  - name: ng-batch
-    minSize: 2
-    maxSize: 5
-    desiredCapacity: 2
-    amiFamily: AmazonLinux2
-    privateNetworking: true
-    disableIMDSv1: false
-    labels:
-      nodegroup-type: batch
-    instancesDistribution:
-      maxPrice: 0.017
-      instanceTypes: ["t3.small", "t3.medium"]
-      onDemandBaseCapacity: 0
-      onDemandPercentageAboveBaseCapacity: 50
-      spotInstancePools: 2
+  #- name: ng-backend
+  #  instanceType: t3a.medium
+  #  minSize: 2
+  #  maxSize: 5
+  #  desiredCapacity: 2
+  #  amiFamily: AmazonLinux2
+  #  privateNetworking: true
+  #  disableIMDSv1: true
+  #  labels:
+  #    nodegroup-type: backend
+  #  iam:
+  #    withAddonPolicies:
+  #      autoScaler: true
+  #  tags:
+  #    k8s.io/cluster-autoscaler/enabled: "true"
+  #    k8s.io/cluster-autoscaler/test-complete-multi-ng: "owned"
+  #- name: ng-batch
+  #  minSize: 2
+  #  maxSize: 5
+  #  desiredCapacity: 2
+  #  amiFamily: AmazonLinux2
+  #  privateNetworking: true
+  #  disableIMDSv1: false
+  #  labels:
+  #    nodegroup-type: batch
+  #  instancesDistribution:
+  #    maxPrice: 0.017
+  #    instanceTypes: ["t3.small", "t3.medium"]
+  #    onDemandBaseCapacity: 0
+  #    onDemandPercentageAboveBaseCapacity: 50
+  #    spotInstancePools: 2
+
+cloudWatch:
+  clusterLogging:
+    enableTypes:
+    - api
+    - audit
+
+karpenter:
+  version: "v0.24.0"
+  createServiceAccount: true
 
 iam:
   withOIDC: true
   serviceAccounts:
+
   - metadata:
       name: s3-reader
       namespace: backend-apps
       labels: {aws-usage: "application"}
     attachPolicyARNs:
     - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+
   - metadata:
       name: aws-load-balancer-controller
       namespace: kube-system
-    attachPolicy:
-      Version: "2012-10-17"
-      Statement:
-      - Effect: Allow
-        Action:
-        - "iam:CreateServiceLinkedRole"
-        Resource: '*'
-        Condition:
-          StringEquals:
-            "iam:AWSServiceName": "elasticloadbalancing.amazonaws.com"
-      - Effect: Allow
-        Action:
-        - "acm:DescribeCertificate"
-        - "acm:ListCertificates"
-        - "acm:GetCertificate"
-        Resource: '*'
-      - Effect: Allow
-        Action:
-        - "ec2:DescribeAccountAttributes"
-        - "ec2:DescribeAddresses"
-        - "ec2:DescribeAvailabilityZones"
-        - "ec2:DescribeInternetGateways"
-        - "ec2:DescribeVpcs"
-        - "ec2:DescribeVpcPeeringConnections"
-        - "ec2:DescribeSubnets"
-        - "ec2:DescribeSecurityGroups"
-        - "ec2:DescribeInstances"
-        - "ec2:DescribeNetworkInterfaces"
-        - "ec2:DescribeTags"
-        - "ec2:GetCoipPoolUsage"
-        - "ec2:DescribeCoipPools"
-        - "elasticloadbalancing:DescribeLoadBalancers"
-        - "elasticloadbalancing:DescribeLoadBalancerAttributes"
-        - "elasticloadbalancing:DescribeListeners"
-        - "elasticloadbalancing:DescribeListenerCertificates"
-        - "elasticloadbalancing:DescribeSSLPolicies"
-        - "elasticloadbalancing:DescribeRules"
-        - "elasticloadbalancing:DescribeTargetGroups"
-        - "elasticloadbalancing:DescribeTargetGroupAttributes"
-        - "elasticloadbalancing:DescribeTargetHealth"
-        - "elasticloadbalancing:DescribeTags"
-        - "elasticloadbalancing:CreateLoadBalancer"
-        - "elasticloadbalancing:CreateTargetGroup"
-        - "elasticloadbalancing:CreateListener"
-        - "elasticloadbalancing:DeleteListener"
-        - "elasticloadbalancing:CreateRule"
-        - "elasticloadbalancing:DeleteRule"
-        - "elasticloadbalancing:AddTags"
-        - "elasticloadbalancing:RemoveTags"
-        - "elasticloadbalancing:ModifyLoadBalancerAttributes"
-        - "elasticloadbalancing:SetIpAddressType"
-        - "elasticloadbalancing:SetSecurityGroups"
-        - "elasticloadbalancing:SetSubnets"
-        - "elasticloadbalancing:DeleteLoadBalancer"
-        - "elasticloadbalancing:ModifyTargetGroup"
-        - "elasticloadbalancing:ModifyTargetGroupAttributes"
-        - "elasticloadbalancing:DeleteTargetGroup"
-        - "elasticloadbalancing:RegisterTargets"
-        - "elasticloadbalancing:DeregisterTargets"
-        - "elasticloadbalancing:SetWebAcl"
-        - "elasticloadbalancing:ModifyListener"
-        - "elasticloadbalancing:AddListenerCertificates"
-        - "elasticloadbalancing:RemoveListenerCertificates"
-        - "elasticloadbalancing:ModifyRule"
-        Resource: '*'
-      - Effect: Allow
-        Action:
-        - "cognito-idp:DescribeUserPoolClient"
-        - "acm:ListCertificates"
-        - "acm:DescribeCertificate"
-        - "iam:ListServerCertificates"
-        - "iam:GetServerCertificate"
-        - "waf-regional:GetWebACL"
-        - "waf-regional:GetWebACLForResource"
-        - "waf-regional:AssociateWebACL"
-        - "waf-regional:DisassociateWebACL"
-        - "wafv2:GetWebACL"
-        - "wafv2:GetWebACLForResource"
-        - "wafv2:AssociateWebACL"
-        - "wafv2:DisassociateWebACL"
-        - "shield:GetSubscriptionState"
-        - "shield:DescribeProtection"
-        - "shield:CreateProtection"
-        - "shield:DeleteProtection"
-        Resource: '*'
-      - Effect: Allow
-        Action:
-        - "ec2:AuthorizeSecurityGroupIngress"
-        - "ec2:RevokeSecurityGroupIngress"
-        - "ec2:CreateSecurityGroup"
-        - "ec2:CreateTags"
-        - "ec2:DeleteTags"
-        - "ec2:AuthorizeSecurityGroupIngress"
-        - "ec2:RevokeSecurityGroupIngress"
-        - "ec2:DeleteSecurityGroup"
-        Resource: '*'
-      - Effect: Allow
-        Action:
-        - "cognito-idp:DescribeUserPoolClient"
-        Resource: '*'
-      - Effect: Allow
-        Action:
-        - "waf-regional:GetWebACLForResource"
-        - "waf-regional:GetWebACL"
-        - "waf-regional:AssociateWebACL"
-        - "waf-regional:DisassociateWebACL"
-        Resource: '*'
-      - Effect: Allow
-        Action:
-        - "tag:GetResources"
-        - "tag:TagResources"
-        Resource: '*'
-      - Effect: Allow
-        Action:
-        - "waf:GetWebACL"
-        Resource: '*'
+    roleName: aws-load-balancer-controller@kube-system
+    wellKnownPolicies:
+      awsLoadBalancerController: true
 
   - metadata:
       name: cluster-autoscaler
       namespace: kube-system
-    attachPolicy:
-      Version: "2012-10-17"
-      Statement:
-      - Effect: Allow
-        Action:
-        - "autoscaling:DescribeAutoScalingGroups"
-        - "autoscaling:DescribeAutoScalingInstances"
-        - "autoscaling:DescribeLaunchConfigurations"
-        - "autoscaling:DescribeTags"
-        - "autoscaling:SetDesiredCapacity"
-        - "autoscaling:TerminateInstanceInAutoScalingGroup"
-        - "ec2:DescribeLaunchTemplateVersions"
-        Resource: '*'
-
-  - metadata:
-      name: karpenter
-      namespace: kube-system
-    attachPolicy:
-      Version: "2012-10-17"
-      Statement:
-      - Effect: Allow
-        Action:
-        - "ec2:CreateFleet"
-        - "ec2:CreateLaunchTemplate"
-        - "ec2:CreateTags"
-        - "ec2:DeleteLaunchTemplate"
-        - "ec2:DescribeAvailabilityZones"
-        - "ec2:DescribeInstances"
-        - "ec2:DescribeInstanceTypeOfferings"
-        - "ec2:DescribeInstanceTypes"
-        - "ec2:DescribeLaunchTemplates"
-        - "ec2:DescribeSecurityGroups"
-        - "ec2:DescribeSpotPriceHistory"
-        - "ec2:DescribeSubnets"
-        - "ec2:RunInstances"
-        - "iam:PassRole"
-        - "pricing:GetProducts"
-        - "ssm:GetParameter"
-        Resource: '*'
-      - Effect: Allow
-        Action:
-        - "ec2:TerminateInstances"
-        Condition:
-          StringLike:
-            ec2:ResourceTag/Name:
-            - "*karpenter*"
-        Resource: '*'
+    roleName: cluster-autoscaler@kube-system
+    wellKnownPolicies:
+      autoScaler: true
 
   - metadata:
       name: external-dns
       namespace: kube-system
-    attachPolicy:
-      Version: "2012-10-17"
-      Statement:
-      - Effect: Allow
-        Action:
-        - "route53:ChangeResourceRecordSets"
-        Resource:
-        - "arn:aws:route53:::hostedzone/*"
-      - Effect: Allow
-        Action:
-        - "route53:ListHostedZones"
-        - "route53:ListResourceRecordSets"
-        Resource: '*'
+    roleName: external-dns@kube-system
+    wellKnownPolicies:
+      externalDNS: true
 
   - metadata:
       name: aws-ebs-csi-driver
       namespace: kube-system
-    attachPolicy:
-      Version: "2012-10-17"
-      Statement:
-      - Effect: Allow
-        Action:
-        - "ec2:CreateSnapshot"
-        - "ec2:AttachVolume"
-        - "ec2:DetachVolume"
-        - "ec2:ModifyVolume"
-        - "ec2:DescribeAvailabilityZones"
-        - "ec2:DescribeInstances"
-        - "ec2:DescribeSnapshots"
-        - "ec2:DescribeTags"
-        - "ec2:DescribeVolumes"
-        - "ec2:DescribeVolumesModifications"
-        Resource: '*'
-      - Effect: Allow
-        Action:
-        - "ec2:CreateTags"
-        Condition:
-          StringLike:
-            ec2:CreateAction:
-            - "CreateVolume"
-            - "CreateSnapshot"
-        Resource:
-        - "arn:aws:ec2:*:*:volume/*"
-        - "arn:aws:ec2:*:*:snapshot/*"
-      - Effect: Allow
-        Action:
-        - "ec2:DeleteTags"
-        Resource:
-        - "arn:aws:ec2:*:*:volume/*"
-        - "arn:aws:ec2:*:*:snapshot/*"
-      - Effect: Allow
-        Action:
-        - "ec2:CreateVolume"
-        Condition:
-          StringLike:
-            aws:RequestTag/ebs.csi.aws.com/cluster:
-            - "true"
-      - Effect: Allow
-        Resource: '*'
-        Action":
-        - "ec2:CreateVolume"
-        Condition:
-          StringLike:
-            aws:RequestTag/kubernetes.io/cluster/*: "owned"
-      - Action:
-        - "ec2:DeleteVolume"
-        Condition:
-          StringLike:
-            ec2:ResourceTag/ebs.csi.aws.com/cluster: "true"
-        Effect: "Allow"
-        Resource: '*'
-      - Action:
-        - "ec2:DeleteVolume"
-        Condition:
-          StringLike:
-            ec2:ResourceTag/CSIVolumeName: "*"
-        Effect: "Allow"
-        Resource: '*'
-      - Action:
-        - "ec2:DeleteVolume"
-        Condition:
-          StringLike:
-            ec2:ResourceTag/kubernetes.io/cluster/*: "owned"
-        Effect: "Allow"
-        Resource: '*'
-      - Action:
-        - "ec2:DeleteSnapshot"
-        Condition:
-          StringLike:
-            ec2:ResourceTag/CSIVolumeSnapshotName: "*"
-        Effect: "Allow"
-        Resource: '*'
-      - Action:
-        - "ec2:DeleteSnapshot"
-        Condition:
-          StringLike:
-            ec2:ResourceTag/ebs.csi.aws.com/cluster: "true"
-        Effect: "Allow"
-        Resource": '*'
+    roleName: aws-ebs-csi-driver@kube-system
+    wellKnownPolicies:
+      ebsCSIController: true

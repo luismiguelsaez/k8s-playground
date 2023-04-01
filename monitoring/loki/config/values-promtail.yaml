@@ -1,0 +1,10 @@
+---
+
+daemonset:
+  enabled: true
+
+config:
+  logLevel: info
+  clients:
+    - url: http://loki-gateway.monitoring.svc.cluster.local/loki/api/v1/push
+      tenant_id: 1

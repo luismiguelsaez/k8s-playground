@@ -5,7 +5,7 @@ podLabels:
   infra/component: controller
 nodeSelector: {}
 affinity: {}
-clusterName: lok-k8s-main
+clusterName: test-complete-multi-ng
 serviceAccount:
   create: false
   name: aws-load-balancer-controller

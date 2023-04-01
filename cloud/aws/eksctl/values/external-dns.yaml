@@ -9,7 +9,7 @@ extraArgs:
   - --aws-zone-type=private
   - --events
   - --service-type-filter=LoadBalancer
-  - --annotation-filter="kubernetes.io/dns-type in (private)"
+  - --annotation-filter=kubernetes.io/dns-type in (private)
 deploymentStrategy:
   type: Recreate
 podLabels:

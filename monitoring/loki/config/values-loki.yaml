@@ -21,10 +21,8 @@ singleBinary:
     maxReplicas: 3
     targetCPUUtilizationPercentage: 60
     targetMemoryUtilizationPercentage:
-
 write:
   replicas: 2
-
 read:
   replicas: 2
   autoscaling:
@@ -35,6 +33,21 @@ read:
     targetMemoryUtilizationPercentage:
 
 loki:
+  #storage:
+  #  bucketNames:
+  #    chunks: chunks
+  #    ruler: ruler
+  #    admin: admin
+  #  type: s3
+  #  s3:
+  #    s3: null
+  #    endpoint: null
+  #    region: null
+  #    secretAccessKey: null
+  #    accessKeyId: null
+  #    s3ForcePathStyle: false
+  #    insecure: false
+  #    http_config: {}
   storage:
     type: filesystem
     filesystem:
@@ -51,7 +64,7 @@ monitoring:
   serviceMonitor:
     enabled: false
   lokiCanary:
-    enabled: false
+    enabled: true
 
 test:
-  enabled: false
+  enabled: true

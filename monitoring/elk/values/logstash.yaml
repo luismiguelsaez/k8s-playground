@@ -1,0 +1,10 @@
+
+extraInitContainers: []
+  #- name: install-plugins
+  #  image: docker.elastic.co/logstash/logstash:7.17.3
+  #  command: ['bin/logstash-plugin', 'install', 'logstash-output-gelf']
+
+#lifecycle:
+#  postStart:
+#    exec:
+#      command: ["/usr/share/logstash/bin/logstash-plugin","install","logstash-output-gelf"]

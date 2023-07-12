@@ -1,0 +1,25 @@
+deployment:
+  labels:
+    infra/app: aws-ack
+    infra/component: sns-controller
+  nodeSelector:
+    role: system
+
+metrics:
+  create: false
+
+aws:
+  region: eu-central-1
+
+installScope: cluster
+
+log:
+  level: info
+
+deletionPolicy: delete # set to retain to keep the AWS resource after k8s resource deletion
+
+serviceAccount:
+  create: true
+  name: aws-sns-controller
+  annotations:
+    eks.amazonaws.com/role-arn: arn:aws:iam::542748512672:role/lok-k8s-main-aws-ack-sns-controller@kube-system

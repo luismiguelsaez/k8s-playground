@@ -105,7 +105,7 @@ aws iam attach-role-policy \
 
 - Install ( https://aws-controllers-k8s.github.io/community/docs/user-docs/install/#install-an-ack-service-controller-with-helm-recommended )
   ```
-  helm upgrade --install aws-sns oci://public.ecr.aws/aws-controllers-k8s/sns-chart --version 1.0.2 --namespace kube-system --values helm/values/aws-sns.yaml
+  helm upgrade --install aws-ack-sns oci://public.ecr.aws/aws-controllers-k8s/sns-chart --version 1.0.2 --namespace kube-system --values helm/values/aws-sns.yaml
   ```
 
 ## Create resources
@@ -119,10 +119,30 @@ metadata:
   name: test-topic
 spec:
   name: test-topic
+  displayName: "Test topic"
   fifoTopic: "false"
+  policy: |
+    {
+    }
+  kmsMasterKeyID: ""
+  dataProtectionPolicy: ""
   tags:
     - key: "env"
       value: "test"
+EOF
+```
+
+- Create SNS subscription
+```yaml
+cat << EOF | kubectl apply -f -
+apiVersion: sns.services.k8s.aws/v1alpha1
+kind: Subscription
+metadata:
+  name: test-subscription
+spec:
+  topicArn: arn:aws:sns:eu-central-1:542748512672:test-topic
+  protocol: sqs
+  endpoint: arn:aws:sqs:eu-central-1:542748512672:test-queue
 EOF
 ```
 

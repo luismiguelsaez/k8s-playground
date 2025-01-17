@@ -27,7 +27,7 @@ helm show values oci://public.ecr.aws/mechanicadvisor/apisix --version 2.9.0
 helm repo add bitnami https://charts.bitnami.com/bitnami
 
 helm upgrade --kube-context stage --install apisix-redis bitnami/redis --version 20.3.0 -n apisix --create-namespace -f values-redis.yaml
-helm upgrade --kube-context stage --install apisix oci://public.ecr.aws/mechanicadvisor --version 2.9.0 -n apisix --create-namespace -f values-apisix.yaml -f values-apisix-stage.yaml
+helm upgrade --kube-context stage --install apisix oci://public.ecr.aws/mechanicadvisor/apisix --version 2.9.0 -n apisix --create-namespace -f values-apisix.yaml -f values-apisix-stage.yaml
 ```
 
 ## Helm setup

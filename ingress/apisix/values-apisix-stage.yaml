@@ -1,0 +1,59 @@
+---
+ssl:
+  enabled: true
+
+service:
+  type: LoadBalancer
+  externalTrafficPolicy: Local
+  annotations:
+    external-dns.alpha.kubernetes.io/hostname: apisix.stage.steercrm.dev
+    service.beta.kubernetes.io/aws-load-balancer-name: stage-apisix
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: instance
+    service.beta.kubernetes.io/aws-load-balancer-type: external
+    service.beta.kubernetes.io/aws-load-balancer-scheme: internet-facing
+    service.beta.kubernetes.io/aws-load-balancer-backend-protocol: tcp
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-protocol: tcp
+    service.beta.kubernetes.io/aws-load-balancer-healthcheck-port: traffic-port
+    service.beta.kubernetes.io/aws-load-balancer-ssl-ports: 443
+    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: |-
+      arn:aws:acm:us-east-2:447542674857:certificate/76c9240f-391f-4c45-827c-db88767e2295
+    service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: 3600
+  http:
+    enabled: true
+    servicePort: 80
+    containerPort: 9080
+  tls:
+    servicePort: 443
+
+apisix:
+  discovery:
+    registry:
+      # https://apisix.apache.org/docs/apisix/3.10/discovery/kubernetes/#single-cluster-mode-configuration
+      kubernetes:
+        namespace_selector:
+          match:
+            - identity-stage
+            - infra-1-stage
+        label_selector: |-
+          apisix=managed
+  ssl:
+    enabled: true
+    containerPort: 9080
+    # Override the Gateway Service container target port: https://github.com/apache/apisix-helm-chart/pull/782
+    serviceTargetPort: 9080
+
+ingress-controller:
+  config:
+    logLevel: panic
+    kubernetes:
+      namespaceSelector:
+        - kubernetes.io/metadata.name=identity-stage
+        - kubernetes.io/metadata.name=infra-1-stage
+
+resources:
+  requests:
+    memory: 512Mi
+    cpu: 500m
+  limits:
+    memory: 512Mi
+    cpu: '2'

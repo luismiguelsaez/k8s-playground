@@ -1,0 +1,194 @@
+---
+apiVersion: apisix.apache.org/v2
+kind: ApisixPluginConfig
+metadata:
+  name: real-ip-from-header
+  namespace: identity-stage
+spec:
+  plugins:
+    - name: real-ip
+      enable: true
+      config:
+        source: http_x_forwarded_for
+    - name: coraza-filter
+      enable: false
+      config:
+        conf:
+          directives_map:
+            default:
+              - SecDebugLogLevel 9
+              - SecRuleEngine On
+              - Include @crs-setup-conf
+              # https://github.com/coreruleset/coreruleset/tree/main/rules
+              - Include @owasp_crs/*.conf
+          default_directives: default
+    - name: ip-restriction
+      enable: false
+      config:
+        whitelist: []
+    - name: api-breaker
+      enable: false
+      config:
+          break_response_code: 502
+          unhealthy:
+            http_statuses: [500, 503]
+            failures: 3
+    - name: proxy-cache
+      enable: true
+      config:
+        cache_strategy: disk
+        cache_key: ["$request_uri", "$host"]
+        cache_method: ["GET"]
+        cache_http_status: [200, 301, 404]
+        cache_bypass: ["$arg_bypass"]
+---
+apiVersion: apisix.apache.org/v2
+kind: ApisixPluginConfig
+metadata:
+  name: rate-limit
+  namespace: identity-stage
+spec:
+  plugins:
+    - name: workflow
+      enable: true
+      config:
+          rules:
+            # https://github.com/api7/lua-resty-expr#operator-list
+            - case:
+                - ["uri", "~~", '/v([0-9]+(?:\.[0-9]+)?(?:-[A-Z]+))/(tenants|users)(?:/.*)?']
+              actions:
+                  - [
+                      "limit-count",
+                      {
+                        "count": 15,
+                        "time_window": 1,
+                        "rejected_code": 429,
+                        "rejected_msg": "Limit exceeded for path",
+                        "key_type": "var_combination",
+                        "key": "$uri-$remote_addr",
+                        "policy": "redis",
+                        "redis_host": "apisix-redis-headless.apisix",
+                        "redis_port": 6379
+                      }
+                    ]
+    - name: limit-count
+      enable: true 
+      config:
+        count: 20 
+        time_window: 10
+        rejected_code: 429
+        key_type: var_combination
+        key: "$uri $remote_addr"
+        policy: redis
+        redis_host: apisix-redis-headless.apisix
+        redis_port: 6379
+    - name: serverless-pre-function
+      enable: false
+      config:
+        phase: before_proxy
+        functions:
+          - |-
+            return function(conf, ctx)
+                local http = require("resty.http")
+                local core = require("apisix.core")
+                local ngx_re = require("ngx.re")
+
+                core.log.error("Proxy: ", ngx.var.proxy_host)
+
+                -- Look for tenant ID in the path
+                local i, j, err = ngx.re.find(ngx.var.uri, "^/action/([a-z0-9]{8}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{4}-[a-z0-9]{12})/", "jo", nil, 1)
+                local tenant_id = nil 
+                if i then
+                  tenant_id = string.sub(ngx.var.uri, i, j)
+                  core.log.info("Found tenant ID in request URI: ", tenant_id)
+                end
+
+                -- Redis connection ( https://github.com/openresty/lua-resty-redis )
+                if tenant_id ~= nil then
+                  core.log.debug("Creating Redis client")
+                  local redis = require "resty.redis"
+                  local red, err = redis:new()
+                  red:set_timeouts(1000, 1000, 1000)
+                  local ok, err = red:connect("redis-master.apisix", 6379)
+                  if not ok then
+                    core.log.error("Error while connecting to Redis: ", err)
+                  else
+                    local res, err = red:get(tenant_id)
+                    if res == ngx.null then
+                      core.log.warn("Tenant ID not found in Redis: ", tenant_id)
+                      -- Add header
+                      ngx.req.set_header('x-tenant-id', "not_known")
+                    else
+                      core.log.error("Tenant ID found in Redis: ", res)
+                      -- Add header
+                      ngx.req.set_header('x-tenant-id', tenant_id)
+                    end
+                  end
+
+                  -- return 200, "Success!!"
+                else
+                  core.log.error("No tenant ID in request, skipping Redis check")
+                  -- return 404, "Not found!!"
+                end
+
+                return conf.status, conf.body
+            end
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: rooster-ui
+  namespace: identity-stage
+  annotations:
+    k8s.apisix.apache.org/http-to-https: "false"
+    k8s.apisix.apache.org/plugin-config-name: "real-ip-from-header"
+spec:
+  ingressClassName: apisix
+  rules:
+  - http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: rooster-ui-stage
+            port:
+              number: 80
+
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: admin-api
+  namespace: identity-stage
+  annotations:
+    k8s.apisix.apache.org/http-to-https: "false"
+    k8s.apisix.apache.org/plugin-config-name: "rate-limit"
+    k8s.apisix.apache.org/upstream-scheme: "http"
+    k8s.apisix.apache.org/use-regex: "true"
+    k8s.apisix.apache.org/enable-websocket: "false"
+spec:
+  ingressClassName: apisix
+  rules:
+  - http:
+      paths:
+      - path: /api/.*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: admin-api-stage
+            port:
+              number: 80
+---
+apiVersion: apisix.apache.org/v2
+kind: ApisixUpstream
+metadata:
+  name: admin-api-stage
+  namespace: identity-stage
+  labels:
+    apisix: managed
+spec:
+  loadbalancer:
+    hashOn: cookie
+    key: Access-Token
+    type: chash

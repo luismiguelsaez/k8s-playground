@@ -1,0 +1,173 @@
+---
+replicaCount: 2
+timezone: UTC
+rbac:
+  create: true
+serviceAccount:
+  create: true
+etcd:
+  persistence:
+    storageClass: gp3
+dashboard:
+  enabled: true
+extraVolumes:
+  - name: plugins
+    emptyDir: {}
+extraVolumeMounts:
+  - name: plugins
+    mountPath: /plugins
+    readOnly: true
+extraInitContainers:
+  - name: install-coraza
+    image: busybox:1.36.1
+    command:
+      - 'sh'
+      - '-c'
+      - "wget https://github.com/corazawaf/coraza-proxy-wasm/releases/download/0.5.0/coraza-proxy-wasm-0.5.0.zip -O coraza.zip; unzip coraza.zip; cp coraza-proxy-wasm.wasm /plugins/"
+    volumeMounts:
+      - name: plugins
+        mountPath: /plugins
+ingress:
+  enabled: false
+  className: alb
+  annotations: {}
+  hosts: []
+service:
+  type: NodePort
+  externalTrafficPolicy: Cluster
+  annotations: {}
+  http:
+    enabled: true
+    servicePort: 80
+    containerPort: 9080
+  tls:
+    servicePort: 443
+  stream:
+    enabled: false
+    tcp: [9080]
+    udp: []
+apisix:
+  admin:
+    credentials:
+      admin: edd1c9f034335f136f87ad84b625c8f1
+      viewer: 4054f7cf07e344346cd3f287985e76a2
+  nginx:
+    envs:
+      - KUBERNETES_SERVICE_HOST
+      - KUBERNETES_SERVICE_PORT
+    logs:
+      enableAccessLog: true
+      accessLog: /dev/stdout
+      accessLogFormat: '$remote_addr:$server_port - [$time_local] $http_host \"$request\" $status $body_bytes_sent $request_time \"$http_referer\" \"$http_user_agent\" $upstream_addr $upstream_status $upstream_response_time \"$upstream_scheme://$upstream_host$upstream_uri\"'
+      accessLogFormatEscape: default
+      errorLog: /dev/stderr
+      errorLogLevel: error
+    customLuaSharedDicts:
+      - name: memory
+        size: 50m
+    configurationSnippet:
+      httpSrv: |
+          if ($server_port = '80'){
+            return 301 https://$host$request_uri;
+          }
+  ssl:
+    enabled: true
+    # Target HTTP port because the SSL is offloaded to the NLB
+    # Not available yet: https://github.com/apache/apisix-helm-chart/pull/782
+    serviceTargetPort: 9080
+  discovery:
+    enabled: true
+    registry:
+      # https://apisix.apache.org/docs/apisix/discovery/kubernetes/
+      kubernetes:
+        namespace_selector:
+          # To be overriden per environment
+          match: []
+        label_selector: ""
+        #watch_endpoint_slices: false
+        #service:
+        #  schema: https #default https
+        #  host: ${KUBERNETES_SERVICE_HOST} #default ${KUBERNETES_SERVICE_HOST}
+        #  port: ${KUBERNETES_SERVICE_PORT}  #default ${KUBERNETES_SERVICE_PORT}
+        #client:
+        #  token_file: /var/run/secrets/kubernetes.io/serviceaccount/token
+        #default_weight: 50
+  prometheus:
+    enabled: true 
+    path: /apisix/prometheus/metrics
+    metricPrefix: apisix_
+    containerPort: 9091
+  # https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L596
+  # https://apisix.apache.org/docs/apisix/plugins/prometheus/
+  pluginAttrs:
+    prometheus:
+      export_addr:
+        ip: 0.0.0.0
+        port: 9091 
+      export_uri: /apisix/prometheus/metrics
+      metric_prefix: apisix_
+      metrics:
+        http_status:
+          extra_labels:
+            - upstream_addr: $upstream_addr
+            - upstream_status: $upstream_status
+            - uri: $uri
+        http_latency:
+          extra_labels:
+            - upstream_addr: $upstream_addr
+            - upstream_status: $upstream_status
+            - uri: $uri
+        bandwidth:
+          extra_labels:
+            - upstream_addr: $upstream_addr
+            - upstream_status: $upstream_status
+            - uri: $uri
+      default_buckets:
+        - 10
+        - 50
+        - 100
+        - 200
+        - 500
+  wasm:
+    enabled: true
+    # Install: https://github.com/corazawaf/coraza-proxy-wasm/releases/download/0.5.0/coraza-proxy-wasm-0.5.0.zip
+    plugins:
+      - name: coraza-filter
+        priority: 7999
+        file: /plugins/coraza-proxy-wasm.wasm
+        http_request_phase: access
+  customPlugins:
+    enabled: false
+metrics:
+    serviceMonitor:
+      enabled: true
+# Values for ingress-cntroller subchart
+ingress-controller:
+  enabled: true
+  replicaCount: 1
+  # https://github.com/apache/apisix-ingress-controller/blob/master/conf/config-default.yaml 
+  config:
+    logLevel: info
+    logOutput: stderr
+    apisix:
+      serviceName: apisix-admin
+      serviceNamespace: apisix
+      adminAPIVersion: v3
+      adminKey: edd1c9f034335f136f87ad84b625c8f1
+      # Secret created from APISIX main helm chart
+      #existingSecret: apisix-admin-credentials 
+      #existingSecretAdminKeyKey: admin
+    ingressPublishService: apisix/apisix-gateway
+    ingressStatusAddress: []
+    apisixResourceSyncInterval: 1m
+    kubernetes:
+      ingressClass: apisix
+      resyncInterval: 1m
+      # To be overriden per environment
+      namespaceSelector: []
+  gateway:
+    tls:
+      enabled: true
+    type: NodePort
+    externalTrafficPolicy: Local
+    annotations: {}

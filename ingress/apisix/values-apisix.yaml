@@ -37,10 +37,12 @@ ingress:
   hosts: []
 service:
   type: NodePort
+  # Allows APISIX to see the client IP
   externalTrafficPolicy: Cluster
   annotations: {}
   http:
-    enabled: true
+    # Disabled due to inability to redirect HTTP to HTTPS
+    enabled: false
     servicePort: 80
     containerPort: 9080
   tls:

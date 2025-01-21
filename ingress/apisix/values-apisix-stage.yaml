@@ -19,7 +19,7 @@ service:
       arn:aws:acm:us-east-2:447542674857:certificate/76c9240f-391f-4c45-827c-db88767e2295
     service.beta.kubernetes.io/aws-load-balancer-connection-idle-timeout: 3600
   http:
-    enabled: true
+    enabled: false
     servicePort: 80
     containerPort: 9080
   tls:

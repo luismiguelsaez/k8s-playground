@@ -24,6 +24,8 @@ service:
     containerPort: 9080
   tls:
     servicePort: 443
+  stream:
+    enabled: false
 
 apisix:
   discovery:

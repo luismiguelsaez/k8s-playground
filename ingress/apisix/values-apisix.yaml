@@ -1,4 +1,7 @@
 ---
+# Issues
+## No ability to configure proxy-protocol: https://github.com/apache/apisix-helm-chart/pull/756
+## No ability to configure service to send traffic to a different pod port: https://github.com/apache/apisix-helm-chart/pull/782
 replicaCount: 2
 timezone: UTC
 rbac:
@@ -70,8 +73,13 @@ apisix:
           if ($server_port = '80'){
             return 301 https://$host$request_uri;
           }
+          if ($http_x_forwarded_proto = "http") {
+            return 301 https://$server_name$request_uri;
+          }
   ssl:
     enabled: true
+    # Fix for http-to-https: https://github.com/apache/apisix/issues/7011#issuecomment-1129527674
+    listen_port: 443
     # Target HTTP port because the SSL is offloaded to the NLB
     # Not available yet: https://github.com/apache/apisix-helm-chart/pull/782
     serviceTargetPort: 9080
@@ -100,7 +108,10 @@ apisix:
   # https://github.com/apache/apisix/blob/master/conf/config.yaml.example#L596
   # https://apisix.apache.org/docs/apisix/plugins/prometheus/
   pluginAttrs:
+    redirect:
+      https_port: 443
     prometheus:
+      # Fix for http-to-https plugin as Ingress annotation
       export_addr:
         ip: 0.0.0.0
         port: 9091 

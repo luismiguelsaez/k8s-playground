@@ -133,6 +133,7 @@ spec:
 
                 return conf.status, conf.body
             end
+# SVC: rooster-ui @ identity-stage
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -154,7 +155,7 @@ spec:
             name: rooster-ui-stage
             port:
               number: 80
-
+# SVC: admin-api @ identity-stage
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
@@ -170,7 +171,8 @@ metadata:
 spec:
   ingressClassName: apisix
   rules:
-  - http:
+  - host: api.stage.steercrm.dev
+    http:
       paths:
       - path: /api/.*
         pathType: ImplementationSpecific
@@ -183,7 +185,48 @@ spec:
 apiVersion: apisix.apache.org/v2
 kind: ApisixUpstream
 metadata:
+  # Must match the k8s service name
   name: admin-api-stage
+  namespace: identity-stage
+  labels:
+    apisix: managed
+spec:
+  loadbalancer:
+    hashOn: cookie
+    key: Access-Token
+    type: chash
+# SVC: tenants-api @ identity-stage
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: tenants-api
+  namespace: identity-stage
+  annotations:
+    k8s.apisix.apache.org/http-to-https: "false"
+    k8s.apisix.apache.org/plugin-config-name: "rate-limit"
+    k8s.apisix.apache.org/upstream-scheme: "http"
+    k8s.apisix.apache.org/use-regex: "true"
+    k8s.apisix.apache.org/enable-websocket: "false"
+spec:
+  ingressClassName: apisix
+  rules:
+  - host: api.stage.steercrm.dev
+    http:
+      paths:
+      - path: /tenants-api/.*
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: tenants-api-stage
+            port:
+              number: 80
+---
+apiVersion: apisix.apache.org/v2
+kind: ApisixUpstream
+metadata:
+  # Must match the k8s service name
+  name: tenants-api-stage
   namespace: identity-stage
   labels:
     apisix: managed

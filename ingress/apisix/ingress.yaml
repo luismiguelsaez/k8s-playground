@@ -174,7 +174,7 @@ spec:
   - host: api.stage.steercrm.dev
     http:
       paths:
-      - path: /api/.*
+      - path: /api/v1/admin/.*
         pathType: ImplementationSpecific
         backend:
           service:
@@ -235,3 +235,54 @@ spec:
     hashOn: cookie
     key: Access-Token
     type: chash
+# SVC: reputation @ infra-1-stage
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: reputation
+  namespace: infra-1-stage
+  annotations:
+    k8s.apisix.apache.org/http-to-https: "false"
+    k8s.apisix.apache.org/upstream-scheme: "http"
+    k8s.apisix.apache.org/use-regex: "true"
+    k8s.apisix.apache.org/enable-websocket: "false"
+spec:
+  ingressClassName: apisix
+  rules:
+  - host: api.stage.steercrm.dev
+    http:
+      paths:
+      - path: /api/v1/shops/.*/reputation
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: reputation-infra-1-stage
+            port:
+              number: 80
+# SVC: message-history-api @ infra-1-stage
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: reputation
+  namespace: infra-1-stage
+  annotations:
+    k8s.apisix.apache.org/http-to-https: "false"
+    k8s.apisix.apache.org/upstream-scheme: "http"
+    k8s.apisix.apache.org/use-regex: "true"
+    k8s.apisix.apache.org/enable-websocket: "false"
+spec:
+  ingressClassName: apisix
+  rules:
+  - host: api.stage.steercrm.dev
+    http:
+      paths:
+      - path: /api/v(0|[1-9]\d*)(?:\.(0|[1-9]\d*))?/shops/[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}/message-history/.*
+      # - path: /api/v1/shops/.*/message-history/
+        pathType: ImplementationSpecific
+        backend:
+          service:
+            name: message-history-api-infra-1-stage
+            port:
+              number: 80
